@@ -38,7 +38,8 @@ export function generateTokens(
       PrivateKey.pem,
       {
         algorithm: "RS256",
-        issuer: `http://localhost:9229/${userPoolId}`,
+        issuer: `https://cognito-idp.fakelocalhost-9229/${userPoolId}`,
+        // issuer: `http://localhost:9229/${userPoolId}`,
         expiresIn: "24h",
         keyid: "CognitoLocal",
       }

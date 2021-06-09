@@ -30,6 +30,7 @@ export const createCognitoClient = async (
 
     async getUserPoolForClientId(clientId) {
       const appClient = await clients.get<AppClient>(["Clients", clientId]);
+
       if (!appClient) {
         throw new ResourceNotFoundError();
       }

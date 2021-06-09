@@ -106,19 +106,16 @@ export const createUserPoolClient = async (
 
     async getUserByUsername(username) {
       log.debug("getUserByUsername", username);
-
       const aliasEmailEnabled = config.UsernameAttributes?.includes("email");
       const aliasPhoneNumberEnabled = config.UsernameAttributes?.includes(
         "phone_number"
       );
 
       const users = await dataStore.get<Record<string, User>>("Users", {});
-
       for (const user of Object.values(users)) {
         if (attributesIncludeMatch("sub", username, user.Attributes)) {
           return user;
         }
-
         if (
           aliasEmailEnabled &&
           attributesIncludeMatch("email", username, user.Attributes)
