@@ -1,10 +1,16 @@
 {
-  "name": "cognito-local",
-  "version": "0.0.0-development",
+  "name": "cognito-mock",
+  "description": "Fork from cognito-local",
+  "version": "0.0.1",
   "license": "MIT",
   "bin": "lib/bin/start.js",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "homepage": "https://github.com/insomenia/cognito-mock",
+  "bugs": {
+    "url": "https://github.com/insomenia/cognito-mock/issues",
+    "email": "seongjun@insomenia.com"
+  },
   "files": [
     "lib"
   ],
@@ -96,6 +102,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jagregory/cognito-local.git"
+    "url": "https://github.com/insomenia/cognito-mock.git"
   }
 }

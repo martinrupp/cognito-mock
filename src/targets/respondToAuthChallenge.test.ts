@@ -1,7 +1,7 @@
 import { advanceTo } from "jest-date-mock";
 import jwt from "jsonwebtoken";
 import { CodeMismatchError, NotAuthorizedError } from "../errors";
-import PublicKey from "../keys/cognitoLocal.public.json";
+import PublicKey from "../keys/cognitoMock.public.json";
 import { CognitoClient, UserPoolClient } from "../services";
 import { Triggers } from "../services/triggers";
 import {

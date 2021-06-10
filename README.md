@@ -1,6 +1,6 @@
 # Cognito Local
 
-![CI](https://github.com/jagregory/cognito-local/workflows/CI/badge.svg)
+![CI](https://github.com/jagregory/cognito-mock/workflows/CI/badge.svg)
 
 An offline emulator for [Amazon Cognito](https://aws.amazon.com/cognito/).
 
@@ -30,18 +30,18 @@ Additional supported features:
 
 ## Installation
 
-    yarn add --dev cognito-local
+    yarn add --dev cognito-mock
     # OR
-    npm install --dev cognito-local
+    npm install --dev cognito-mock
 
 ## Usage
 
     # if node_modules/.bin is in your $PATH
-    cognito-local
+    cognito-mock
     # OR
-    yarn cognito-local
+    yarn cognito-mock
     # OR
-    npx cognito-local
+    npx cognito-mock
 
 Cognito Local will now be listening on `http://localhost:9229`.
 
@@ -107,7 +107,7 @@ If you need your Lambda endpoint to be HTTPS with a self-signed certificate, you
 verification in Node for Cognito Local. The easiest way to do this is to run Cognito Local with the
 `NODE_TLS_REJECT_UNAUTHORIZED` environment variable.
 
-    NODE_TLS_REJECT_UNAUTHORIZED=0 cognito-local
+    NODE_TLS_REJECT_UNAUTHORIZED=0 cognito-mock
 
 ### User Pools and Clients
 

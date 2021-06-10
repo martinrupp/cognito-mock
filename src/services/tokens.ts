@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import * as uuid from "uuid";
-import PrivateKey from "../keys/cognitoLocal.private.json";
+import PrivateKey from "../keys/cognitoMock.private.json";
 import { User } from "./userPoolClient";
 
 export interface Token {
@@ -41,7 +41,7 @@ export function generateTokens(
         issuer: `https://cognito-idp.fakelocalhost-9229/${userPoolId}`,
         // issuer: `http://localhost:9229/${userPoolId}`,
         expiresIn: "24h",
-        keyid: "CognitoLocal",
+        keyid: "CognitoMock",
       }
     ),
     IdToken: jwt.sign(
@@ -63,7 +63,7 @@ export function generateTokens(
         issuer: `http://localhost:9229/${userPoolId}`,
         expiresIn: "24h",
         audience: clientId,
-        keyid: "CognitoLocal",
+        keyid: "CognitoMock",
       }
     ),
     RefreshToken: "<< TODO >>",

@@ -20,7 +20,7 @@ describe("User Pool Client", () => {
   let cognitoClient: CognitoClient;
 
   beforeEach(async () => {
-    path = await mkdtemp("/tmp/cognito-local:");
+    path = await mkdtemp("/tmp/cognito-mock:");
     tmpCreateDataStore = (id, defaults) => createDataStore(id, defaults, path);
     cognitoClient = await createCognitoClient(
       {

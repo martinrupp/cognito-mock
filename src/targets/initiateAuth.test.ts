@@ -5,7 +5,7 @@ import {
   NotAuthorizedError,
   PasswordResetRequiredError,
 } from "../errors";
-import PublicKey from "../keys/cognitoLocal.public.json";
+import PublicKey from "../keys/cognitoMock.public.json";
 import { CognitoClient, UserPoolClient } from "../services";
 import { Triggers } from "../services/triggers";
 import { User } from "../services/userPoolClient";

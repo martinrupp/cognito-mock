@@ -2,7 +2,7 @@ import { advanceTo } from "jest-date-mock";
 import jwt from "jsonwebtoken";
 import * as uuid from "uuid";
 import { InvalidParameterError } from "../errors";
-import PrivateKey from "../keys/cognitoLocal.private.json";
+import PrivateKey from "../keys/cognitoMock.private.json";
 import { CognitoClient, UserPoolClient } from "../services";
 import { Triggers } from "../services/triggers";
 import { GetUser, GetUserTarget } from "./getUser";
@@ -75,7 +75,7 @@ describe("GetUser target", () => {
           algorithm: "RS256",
           issuer: `http://localhost:9229/test`,
           expiresIn: "24h",
-          keyid: "CognitoLocal",
+          keyid: "CognitoMock",
         }
       ),
     });
@@ -115,7 +115,7 @@ describe("GetUser target", () => {
           algorithm: "RS256",
           issuer: `http://localhost:9229/test`,
           expiresIn: "24h",
-          keyid: "CognitoLocal",
+          keyid: "CognitoMock",
         }
       ),
     });

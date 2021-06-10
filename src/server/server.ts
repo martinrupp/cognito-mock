@@ -5,7 +5,7 @@ import * as http from "http";
 import { CognitoError, unsupported, UnsupportedError } from "../errors";
 import log from "../log";
 import { Router } from "../targets/router";
-import PublicKey from "../keys/cognitoLocal.public.json";
+import PublicKey from "../keys/cognitoMock.public.json";
 
 export interface ServerOptions {
   port: number;

@@ -7,7 +7,7 @@ export class CognitoError extends Error {
 
   public constructor(code: string, message: string) {
     super(message);
-    this.code = `CognitoLocal#${code}`;
+    this.code = `CognitoMock#${code}`;
   }
 }
 
@@ -71,7 +71,7 @@ export class InvalidParameterError extends CognitoError {
 export const unsupported = (message: string, res: Response) => {
   console.error(`Cognito Local unsupported feature: ${message}`);
   return res.status(500).json({
-    code: "CognitoLocal#Unsupported",
+    code: "CognitoMock#Unsupported",
     message: `Cognito Local unsupported feature: ${message}`,
   });
 };

@@ -10,7 +10,7 @@ describe("Data Store", () => {
   let path: string;
 
   beforeEach(async () => {
-    path = await mkdtemp("/tmp/cognito-local:");
+    path = await mkdtemp("/tmp/cognito-mock:");
   });
 
   afterEach(() =>

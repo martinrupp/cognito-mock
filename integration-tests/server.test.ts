@@ -68,7 +68,7 @@ describe("HTTP server", () => {
 
         expect(response.status).toEqual(500);
         expect(response.body).toEqual({
-          code: "CognitoLocal#Unsupported",
+          code: "CognitoMock#Unsupported",
           message: "Cognito Local unsupported feature: integration test",
         });
       });
@@ -94,7 +94,7 @@ describe("HTTP server", () => {
 
           expect(response.status).toEqual(400);
           expect(response.body).toEqual({
-            code: `CognitoLocal#${code}`,
+            code: `CognitoMock#${code}`,
             message,
           });
         }
@@ -116,7 +116,7 @@ describe("HTTP server", () => {
           {
             alg: "RS256",
             e: "AQAB",
-            kid: "CognitoLocal",
+            kid: "CognitoMock",
             kty: "RSA",
             n:
               "2uLO7yh1_6Icfd89V3nNTc_qhfpDN7vEmOYlmJQlc9_RmOns26lg88fXXFntZESwHOm7_homO2Ih6NOtu4P5eskGs8d8VQMOQfF4YrP-pawVz-gh1S7eSvzZRDHBT4ItUuoiVP1B9HN_uScKxIqjmitpPqEQB_o2NJv8npCfqUAU-4KmxquGtjdmfctswSZGdz59M3CAYKDfuvLH9_vV6TRGgbUaUAXWC2WJrbbEXzK3XUDBrmF3Xo-yw8f3SgD3JOPl3HaaWMKL1zGVAsge7gQaGiJBzBurg5vwN61uDGGz0QZC1JqcUTl3cZnrx_L8isIR7074SJEuljIZRnCcjQ",
