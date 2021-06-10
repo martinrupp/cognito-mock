@@ -1,27 +1,23 @@
-import log from "../log";
-import { createCodeDelivery } from "../services";
-import { ConsoleCodeSender } from "../services/codeDelivery/consoleCodeSender";
-import { otp } from "../services/codeDelivery/otp";
-import { createDataStore } from "../services/dataStore";
-import { createLambda } from "../services/lambda";
-import { createTriggers } from "../services/triggers";
-import { createCognitoClient } from "../services/cognitoClient";
-import { createUserPoolClient } from "../services/userPoolClient";
-import { Router } from "../targets/router";
-import { loadConfig } from "./config";
-import { createServer, Server } from "./server";
-import * as AWS from "aws-sdk";
+import * as AWS from 'aws-sdk';
+import log from '../log';
+import { createCodeDelivery } from '../services';
+import { ConsoleCodeSender } from '../services/codeDelivery/consoleCodeSender';
+import { otp } from '../services/codeDelivery/otp';
+import { createDataStore } from '../services/dataStore';
+import { createLambda } from '../services/lambda';
+import { createTriggers } from '../services/triggers';
+import { createCognitoClient } from '../services/cognitoClient';
+import { createUserPoolClient } from '../services/userPoolClient';
+import { Router } from '../targets/router';
+import { loadConfig } from './config';
+import { createServer, Server } from './server';
 
 export const createDefaultServer = async (): Promise<Server> => {
   const config = await loadConfig();
 
-  log.debug("Loaded config:", config);
+  log.debug('Loaded config:', config);
 
-  const cognitoClient = await createCognitoClient(
-    config.UserPoolDefaults,
-    createDataStore,
-    createUserPoolClient
-  );
+  const cognitoClient = await createCognitoClient(config.UserPoolDefaults, createDataStore, createUserPoolClient);
   const lambdaClient = new AWS.Lambda(config.LambdaClient);
   const lambda = createLambda(config.TriggerFunctions, lambdaClient);
   const triggers = createTriggers({

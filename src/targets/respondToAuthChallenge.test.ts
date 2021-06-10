@@ -1,17 +1,14 @@
-import { advanceTo } from "jest-date-mock";
-import jwt from "jsonwebtoken";
-import { CodeMismatchError, NotAuthorizedError } from "../errors";
-import PublicKey from "../keys/cognitoMock.public.json";
-import { CognitoClient, UserPoolClient } from "../services";
-import { Triggers } from "../services/triggers";
-import {
-  RespondToAuthChallenge,
-  RespondToAuthChallengeTarget,
-} from "./respondToAuthChallenge";
+import { advanceTo } from 'jest-date-mock';
+import jwt from 'jsonwebtoken';
+import { CodeMismatchError, NotAuthorizedError } from '../errors';
+import PublicKey from '../keys/cognitoMock.public.json';
+import { CognitoClient, UserPoolClient } from '../services';
+import { Triggers } from '../services/triggers';
+import { RespondToAuthChallenge, RespondToAuthChallengeTarget } from './respondToAuthChallenge';
 
 const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
 
-describe("RespondToAuthChallenge target", () => {
+describe('RespondToAuthChallenge target', () => {
   let respondToAuthChallenge: RespondToAuthChallengeTarget;
   let mockCognitoClient: jest.Mocked<CognitoClient>;
   let mockUserPoolClient: jest.Mocked<UserPoolClient>;
@@ -25,7 +22,7 @@ describe("RespondToAuthChallenge target", () => {
 
     mockUserPoolClient = {
       config: {
-        Id: "test",
+        Id: 'test',
       },
       createAppClient: jest.fn(),
       getUserByUsername: jest.fn(),
@@ -55,116 +52,114 @@ describe("RespondToAuthChallenge target", () => {
 
     await expect(
       respondToAuthChallenge({
-        ClientId: "clientId",
-        ChallengeName: "SMS_MFA",
+        ClientId: 'clientId',
+        ChallengeName: 'SMS_MFA',
         ChallengeResponses: {
-          USERNAME: "0000-0000",
-          SMS_MFA_CODE: "1234",
+          USERNAME: '0000-0000',
+          SMS_MFA_CODE: '1234',
         },
-        Session: "Session",
-      })
+        Session: 'Session',
+      }),
     ).rejects.toBeInstanceOf(NotAuthorizedError);
   });
 
-  describe("when code matches", () => {
-    it("generates tokens", async () => {
+  describe('when code matches', () => {
+    it('generates tokens', async () => {
       mockUserPoolClient.getUserByUsername.mockResolvedValue({
         Attributes: [
-          { Name: "sub", Value: "0000-0000" },
-          { Name: "email", Value: "example@example.com" },
+          { Name: 'sub', Value: '0000-0000' },
+          { Name: 'email', Value: 'example@example.com' },
         ],
-        UserStatus: "CONFIRMED",
-        Password: "hunter2",
-        Username: "0000-0000",
+        UserStatus: 'CONFIRMED',
+        Password: 'hunter2',
+        Username: '0000-0000',
         Enabled: true,
         UserCreateDate: new Date().getTime(),
         UserLastModifiedDate: new Date().getTime(),
-        MFACode: "1234",
+        MFACode: '1234',
       });
 
       const output = await respondToAuthChallenge({
-        ClientId: "clientId",
-        ChallengeName: "SMS_MFA",
+        ClientId: 'clientId',
+        ChallengeName: 'SMS_MFA',
         ChallengeResponses: {
-          USERNAME: "0000-0000",
-          SMS_MFA_CODE: "1234",
+          USERNAME: '0000-0000',
+          SMS_MFA_CODE: '1234',
         },
-        Session: "Session",
+        Session: 'Session',
       });
 
       expect(output).toBeDefined();
-      expect(output.Session).toBe("Session");
+      expect(output.Session).toBe('Session');
 
       // access token
       expect(output.AuthenticationResult.AccessToken).toBeDefined();
-      const decodedAccessToken = jwt.decode(
-        output.AuthenticationResult.AccessToken
-      );
+      const decodedAccessToken = jwt.decode(output.AuthenticationResult.AccessToken);
       expect(decodedAccessToken).toMatchObject({
-        client_id: "clientId",
-        iss: "http://localhost:9229/test",
-        sub: "0000-0000",
-        token_use: "access",
-        username: "0000-0000",
+        client_id: 'clientId',
+        iss: 'http://localhost:9229/test',
+        sub: '0000-0000',
+        token_use: 'access',
+        username: '0000-0000',
         event_id: expect.stringMatching(UUID),
-        scope: "aws.cognito.signin.user.admin", // TODO: scopes
+        scope: 'aws.cognito.signin.user.admin', // TODO: scopes
         auth_time: now.getTime(),
         jti: expect.stringMatching(UUID),
       });
       expect(
         jwt.verify(output.AuthenticationResult.AccessToken, PublicKey.pem, {
-          algorithms: ["RS256"],
-        })
+          algorithms: ['RS256'],
+        }),
       ).toBeTruthy();
 
       // id token
       expect(output.AuthenticationResult.IdToken).toBeDefined();
       const decodedIdToken = jwt.decode(output.AuthenticationResult.IdToken);
       expect(decodedIdToken).toMatchObject({
-        aud: "clientId",
-        iss: "http://localhost:9229/test",
-        sub: "0000-0000",
-        token_use: "id",
-        "cognito:username": "0000-0000",
+        aud: 'clientId',
+        iss: 'http://localhost:9229/test',
+        sub: '0000-0000',
+        token_use: 'id',
+        'cognito:username': '0000-0000',
         email_verified: true,
         event_id: expect.stringMatching(UUID),
         auth_time: now.getTime(),
-        email: "example@example.com",
+        email: 'example@example.com',
       });
       expect(
         jwt.verify(output.AuthenticationResult.IdToken, PublicKey.pem, {
-          algorithms: ["RS256"],
-        })
+          algorithms: ['RS256'],
+        }),
       ).toBeTruthy();
     });
   });
 
-  describe("when code is incorrect", () => {
-    it("throws an error", async () => {
+  describe('when code is incorrect', () => {
+    it('throws an error', async () => {
       mockUserPoolClient.getUserByUsername.mockResolvedValue({
         Attributes: [
-          { Name: "sub", Value: "0000-0000" },
-          { Name: "email", Value: "example@example.com" },
+          { Name: 'sub', Value: '0000-0000' },
+          { Name: 'email', Value: 'example@example.com' },
         ],
-        UserStatus: "CONFIRMED",
-        Password: "hunter2",
-        Username: "0000-0000",
+        UserStatus: 'CONFIRMED',
+        Password: 'hunter2',
+        Username: '0000-0000',
         Enabled: true,
         UserCreateDate: new Date().getTime(),
         UserLastModifiedDate: new Date().getTime(),
-        MFACode: "1234",
+        MFACode: '1234',
       });
 
       await expect(
         respondToAuthChallenge({
-          ClientId: "clientId",
-          ChallengeName: "SMS_MFA",
+          ClientId: 'clientId',
+          ChallengeName: 'SMS_MFA',
           ChallengeResponses: {
-            USERNAME: "0000-0000",
-            SMS_MFA_CODE: "4321",
+            USERNAME: '0000-0000',
+            SMS_MFA_CODE: '4321',
           },
-          Session: "Session",
-        })
+          Session: 'Session',
+        }),
       ).rejects.toBeInstanceOf(CodeMismatchError);
     });
   });

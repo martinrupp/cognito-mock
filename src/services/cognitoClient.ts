@@ -1,11 +1,7 @@
-import { ResourceNotFoundError } from "../errors";
-import { AppClient } from "./appClient";
-import { CreateDataStore } from "./dataStore";
-import {
-  CreateUserPoolClient,
-  UserPool,
-  UserPoolClient,
-} from "./userPoolClient";
+import { ResourceNotFoundError } from '../errors';
+import { AppClient } from './appClient';
+import { CreateDataStore } from './dataStore';
+import { CreateUserPoolClient, UserPool, UserPoolClient } from './userPoolClient';
 
 export interface CognitoClient {
   getUserPool(userPoolId: string): Promise<UserPoolClient>;
@@ -15,31 +11,23 @@ export interface CognitoClient {
 export const createCognitoClient = async (
   userPoolDefaultOptions: UserPool,
   createDataStore: CreateDataStore,
-  createUserPoolClient: CreateUserPoolClient
+  createUserPoolClient: CreateUserPoolClient,
 ): Promise<CognitoClient> => {
-  const clients = await createDataStore("clients", { Clients: {} });
+  const clients = await createDataStore('clients', { Clients: {} });
 
   return {
     async getUserPool(userPoolId) {
-      return createUserPoolClient(
-        { ...userPoolDefaultOptions, Id: userPoolId },
-        clients,
-        createDataStore
-      );
+      return createUserPoolClient({ ...userPoolDefaultOptions, Id: userPoolId }, clients, createDataStore);
     },
 
     async getUserPoolForClientId(clientId) {
-      const appClient = await clients.get<AppClient>(["Clients", clientId]);
+      const appClient = await clients.get<AppClient>(['Clients', clientId]);
 
       if (!appClient) {
         throw new ResourceNotFoundError();
       }
 
-      return createUserPoolClient(
-        { ...userPoolDefaultOptions, Id: appClient.UserPoolId },
-        clients,
-        createDataStore
-      );
+      return createUserPoolClient({ ...userPoolDefaultOptions, Id: appClient.UserPoolId }, clients, createDataStore);
     },
   };
 };

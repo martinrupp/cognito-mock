@@ -1,14 +1,14 @@
-import { Services } from "../services";
-import { UnsupportedError } from "../errors";
-import { ConfirmForgotPassword } from "./confirmForgotPassword";
-import { ConfirmSignUp } from "./confirmSignUp";
-import { CreateUserPoolClient } from "./createUserPoolClient";
-import { ForgotPassword } from "./forgotPassword";
-import { InitiateAuth } from "./initiateAuth";
-import { ListUsers } from "./listUsers";
-import { RespondToAuthChallenge } from "./respondToAuthChallenge";
-import { SignUp } from "./signUp";
-import { GetUser } from "./getUser";
+import { Services } from '../services';
+import { UnsupportedError } from '../errors';
+import { ConfirmForgotPassword } from './confirmForgotPassword';
+import { ConfirmSignUp } from './confirmSignUp';
+import { CreateUserPoolClient } from './createUserPoolClient';
+import { ForgotPassword } from './forgotPassword';
+import { InitiateAuth } from './initiateAuth';
+import { ListUsers } from './listUsers';
+import { RespondToAuthChallenge } from './respondToAuthChallenge';
+import { SignUp } from './signUp';
+import { GetUser } from './getUser';
 
 export const Targets = {
   ConfirmForgotPassword,
@@ -24,8 +24,7 @@ export const Targets = {
 
 type TargetName = keyof typeof Targets;
 
-export const isSupportedTarget = (name: string): name is TargetName =>
-  Object.keys(Targets).includes(name);
+export const isSupportedTarget = (name: string): name is TargetName => Object.keys(Targets).includes(name);
 
 // eslint-disable-next-line
 export type Route = (body: any) => Promise<any>;
@@ -33,10 +32,7 @@ export type Router = (target: string) => Route;
 
 export const Router = (services: Services): Router => (target: string) => {
   if (!isSupportedTarget(target)) {
-    return () =>
-      Promise.reject(
-        new UnsupportedError(`Unsupported x-amz-target header "${target}"`)
-      );
+    return () => Promise.reject(new UnsupportedError(`Unsupported x-amz-target header "${target}"`));
   }
 
   return Targets[target](services);

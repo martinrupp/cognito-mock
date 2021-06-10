@@ -1,4 +1,4 @@
-import supertest from "supertest";
+import supertest from 'supertest';
 import {
   CodeMismatchError,
   CognitoError,
@@ -6,47 +6,42 @@ import {
   NotAuthorizedError,
   UnsupportedError,
   UsernameExistsError,
-} from "../src/errors";
-import { createServer } from "../src/server";
+} from '../src/errors';
+import { createServer } from '../src/server';
 
-describe("HTTP server", () => {
-  describe("/", () => {
-    it("errors with missing x-azm-target header", async () => {
+describe('HTTP server', () => {
+  describe('/', () => {
+    it('errors with missing x-azm-target header', async () => {
       const router = jest.fn();
       const server = createServer(router);
 
-      const response = await supertest(server.application).post("/");
+      const response = await supertest(server.application).post('/');
 
       expect(response.status).toEqual(400);
-      expect(response.body).toEqual({ message: "Missing x-amz-target header" });
+      expect(response.body).toEqual({ message: 'Missing x-amz-target header' });
     });
 
-    it("errors with an poorly formatted x-azm-target header", async () => {
+    it('errors with an poorly formatted x-azm-target header', async () => {
       const router = jest.fn();
       const server = createServer(router);
 
-      const response = await supertest(server.application)
-        .post("/")
-        .set("x-amz-target", "bad-format");
+      const response = await supertest(server.application).post('/').set('x-amz-target', 'bad-format');
 
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
-        message: "Invalid x-amz-target header",
+        message: 'Invalid x-amz-target header',
       });
     });
 
-    describe("a handled target", () => {
-      it("returns the output of a matched target", async () => {
+    describe('a handled target', () => {
+      it('returns the output of a matched target', async () => {
         const route = jest.fn().mockResolvedValue({
           ok: true,
         });
-        const router = (target: string) =>
-          target === "valid" ? route : () => Promise.reject();
+        const router = (target: string) => (target === 'valid' ? route : () => Promise.reject());
         const server = createServer(router);
 
-        const response = await supertest(server.application)
-          .post("/")
-          .set("x-amz-target", "prefix.valid");
+        const response = await supertest(server.application).post('/').set('x-amz-target', 'prefix.valid');
 
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
@@ -54,73 +49,60 @@ describe("HTTP server", () => {
         });
       });
 
-      it("converts UnsupportedErrors from within a target route to a 500 error", async () => {
-        const route = jest
-          .fn()
-          .mockRejectedValue(new UnsupportedError("integration test"));
-        const router = (target: string) =>
-          target === "valid" ? route : () => Promise.reject();
+      it('converts UnsupportedErrors from within a target route to a 500 error', async () => {
+        const route = jest.fn().mockRejectedValue(new UnsupportedError('integration test'));
+        const router = (target: string) => (target === 'valid' ? route : () => Promise.reject());
         const server = createServer(router);
 
-        const response = await supertest(server.application)
-          .post("/")
-          .set("x-amz-target", "prefix.valid");
+        const response = await supertest(server.application).post('/').set('x-amz-target', 'prefix.valid');
 
         expect(response.status).toEqual(500);
         expect(response.body).toEqual({
-          code: "CognitoMock#Unsupported",
-          message: "Cognito Local unsupported feature: integration test",
+          code: 'CognitoMock#Unsupported',
+          message: 'Cognito Local unsupported feature: integration test',
         });
       });
 
       it.each`
         error                                          | code                          | message
-        ${new CognitoError("CognitoError", "message")} | ${"CognitoError"}             | ${"message"}
-        ${new NotAuthorizedError()}                    | ${"NotAuthorizedException"}   | ${"User not authorized"}
-        ${new UsernameExistsError()}                   | ${"UsernameExistsException"}  | ${"User already exists"}
-        ${new CodeMismatchError()}                     | ${"CodeMismatchException"}    | ${"Incorrect confirmation code"}
-        ${new InvalidPasswordError()}                  | ${"InvalidPasswordException"} | ${"Invalid password"}
-      `(
-        "it converts $code to the format Cognito SDK expects",
-        async ({ error, code, message }) => {
-          const route = jest.fn().mockRejectedValue(error);
-          const router = (target: string) =>
-            target === "valid" ? route : () => Promise.reject();
-          const server = createServer(router);
+        ${new CognitoError('CognitoError', 'message')} | ${'CognitoError'}             | ${'message'}
+        ${new NotAuthorizedError()}                    | ${'NotAuthorizedException'}   | ${'User not authorized'}
+        ${new UsernameExistsError()}                   | ${'UsernameExistsException'}  | ${'User already exists'}
+        ${new CodeMismatchError()}                     | ${'CodeMismatchException'}    | ${'Incorrect confirmation code'}
+        ${new InvalidPasswordError()}                  | ${'InvalidPasswordException'} | ${'Invalid password'}
+      `('it converts $code to the format Cognito SDK expects', async ({ error, code, message }) => {
+        const route = jest.fn().mockRejectedValue(error);
+        const router = (target: string) => (target === 'valid' ? route : () => Promise.reject());
+        const server = createServer(router);
 
-          const response = await supertest(server.application)
-            .post("/")
-            .set("x-amz-target", "prefix.valid");
+        const response = await supertest(server.application).post('/').set('x-amz-target', 'prefix.valid');
 
-          expect(response.status).toEqual(400);
-          expect(response.body).toEqual({
-            code: `CognitoMock#${code}`,
-            message,
-          });
-        }
-      );
+        expect(response.status).toEqual(400);
+        expect(response.body).toEqual({
+          code: `CognitoMock#${code}`,
+          message,
+        });
+      });
     });
   });
 
-  describe("jwks endpoint", () => {
-    it("responds with our public key", async () => {
+  describe('jwks endpoint', () => {
+    it('responds with our public key', async () => {
       const server = createServer(jest.fn());
 
-      const response = await supertest(server.application).get(
-        "/any-user-pool/.well-known/jwks.json"
-      );
+      const response = await supertest(server.application).get('/any-user-pool/.well-known/jwks.json');
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         keys: [
           {
-            alg: "RS256",
-            e: "AQAB",
-            kid: "CognitoMock",
-            kty: "RSA",
+            alg: 'RS256',
+            e: 'AQAB',
+            kid: 'CognitoMock',
+            kty: 'RSA',
             n:
-              "2uLO7yh1_6Icfd89V3nNTc_qhfpDN7vEmOYlmJQlc9_RmOns26lg88fXXFntZESwHOm7_homO2Ih6NOtu4P5eskGs8d8VQMOQfF4YrP-pawVz-gh1S7eSvzZRDHBT4ItUuoiVP1B9HN_uScKxIqjmitpPqEQB_o2NJv8npCfqUAU-4KmxquGtjdmfctswSZGdz59M3CAYKDfuvLH9_vV6TRGgbUaUAXWC2WJrbbEXzK3XUDBrmF3Xo-yw8f3SgD3JOPl3HaaWMKL1zGVAsge7gQaGiJBzBurg5vwN61uDGGz0QZC1JqcUTl3cZnrx_L8isIR7074SJEuljIZRnCcjQ",
-            use: "sig",
+              '2uLO7yh1_6Icfd89V3nNTc_qhfpDN7vEmOYlmJQlc9_RmOns26lg88fXXFntZESwHOm7_homO2Ih6NOtu4P5eskGs8d8VQMOQfF4YrP-pawVz-gh1S7eSvzZRDHBT4ItUuoiVP1B9HN_uScKxIqjmitpPqEQB_o2NJv8npCfqUAU-4KmxquGtjdmfctswSZGdz59M3CAYKDfuvLH9_vV6TRGgbUaUAXWC2WJrbbEXzK3XUDBrmF3Xo-yw8f3SgD3JOPl3HaaWMKL1zGVAsge7gQaGiJBzBurg5vwN61uDGGz0QZC1JqcUTl3cZnrx_L8isIR7074SJEuljIZRnCcjQ',
+            use: 'sig',
           },
         ],
       });

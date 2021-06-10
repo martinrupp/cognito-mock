@@ -1,76 +1,70 @@
-import {
-  CognitoClient,
-  createCognitoClient,
-} from "../src/services/cognitoClient";
-import { CreateDataStore, createDataStore } from "../src/services/dataStore";
-import {
-  createUserPoolClient,
-  UserPoolClient,
-} from "../src/services/userPoolClient";
-import fs from "fs";
-import { promisify } from "util";
+import fs from 'fs';
+import { promisify } from 'util';
+import { CognitoClient, createCognitoClient } from '../src/services/cognitoClient';
+import { CreateDataStore, createDataStore } from '../src/services/dataStore';
+import { createUserPoolClient, UserPoolClient } from '../src/services/userPoolClient';
 
 const mkdtemp = promisify(fs.mkdtemp);
 const readFile = promisify(fs.readFile);
 const rmdir = promisify(fs.rmdir);
 
-describe("User Pool Client", () => {
+describe('User Pool Client', () => {
   let path: string;
   let tmpCreateDataStore: CreateDataStore;
   let cognitoClient: CognitoClient;
 
   beforeEach(async () => {
-    path = await mkdtemp("/tmp/cognito-mock:");
+    path = await mkdtemp('/tmp/cognito-mock:');
     tmpCreateDataStore = (id, defaults) => createDataStore(id, defaults, path);
     cognitoClient = await createCognitoClient(
       {
-        Id: "local",
+        Id: 'local',
         UsernameAttributes: [],
       },
       tmpCreateDataStore,
-      createUserPoolClient
+      createUserPoolClient,
     );
   });
 
   afterEach(() =>
     rmdir(path, {
       recursive: true,
-    })
+    }),
   );
 
-  it("creates a database", async () => {
-    await cognitoClient.getUserPool("local");
+  it('creates a database', async () => {
+    await cognitoClient.getUserPool('local');
 
-    expect(fs.existsSync(path + "/local.json")).toBe(true);
+    expect(fs.existsSync(`${path}/local.json`)).toBe(true);
   });
 
-  describe("saveUser", () => {
-    it("saves a user with their username as an additional attribute", async () => {
+  describe('saveUser', () => {
+    it('saves a user with their username as an additional attribute', async () => {
       const now = new Date().getTime();
-      const userPool = await cognitoClient.getUserPool("local");
+      const userPool = await cognitoClient.getUserPool('local');
 
       await userPool.saveUser({
-        Username: "1",
-        Password: "hunter3",
-        UserStatus: "UNCONFIRMED",
-        Attributes: [{ Name: "email", Value: "example@example.com" }],
+        Username: '1',
+        Password: 'hunter3',
+        UserStatus: 'UNCONFIRMED',
+        Attributes: [{ Name: 'email', Value: 'example@example.com' }],
         UserLastModifiedDate: now,
         UserCreateDate: now,
         Enabled: true,
       });
 
-      const file = JSON.parse(await readFile(path + "/local.json", "utf-8"));
+      const file = JSON.parse(await readFile(`${path}/local.json`, 'utf-8'));
 
       expect(file).toEqual({
-        Options: { Id: "local", UsernameAttributes: [] },
+        Options: { Id: 'local', UsernameAttributes: [] },
         Users: {
-          "1": {
-            Username: "1",
-            Password: "hunter3",
-            UserStatus: "UNCONFIRMED",
+          '1': {
+            Username: '1',
+            Password: 'hunter3',
+            UserStatus: 'UNCONFIRMED',
             Attributes: [
-              { Name: "sub", Value: "1" },
-              { Name: "email", Value: "example@example.com" },
+              { Name: 'sub', Value: '1' },
+              { Name: 'email', Value: 'example@example.com' },
             ],
             UserLastModifiedDate: now,
             UserCreateDate: now,
@@ -80,34 +74,34 @@ describe("User Pool Client", () => {
       });
     });
 
-    it("updates a user", async () => {
+    it('updates a user', async () => {
       const now = new Date().getTime();
-      const userPool = await cognitoClient.getUserPool("local");
+      const userPool = await cognitoClient.getUserPool('local');
 
       await userPool.saveUser({
-        Username: "1",
-        Password: "hunter3",
-        UserStatus: "UNCONFIRMED",
-        ConfirmationCode: "1234",
-        Attributes: [{ Name: "email", Value: "example@example.com" }],
+        Username: '1',
+        Password: 'hunter3',
+        UserStatus: 'UNCONFIRMED',
+        ConfirmationCode: '1234',
+        Attributes: [{ Name: 'email', Value: 'example@example.com' }],
         UserLastModifiedDate: now,
         UserCreateDate: now,
         Enabled: true,
       });
 
-      let file = JSON.parse(await readFile(path + "/local.json", "utf-8"));
+      let file = JSON.parse(await readFile(`${path}/local.json`, 'utf-8'));
 
       expect(file).toEqual({
-        Options: { Id: "local", UsernameAttributes: [] },
+        Options: { Id: 'local', UsernameAttributes: [] },
         Users: {
-          "1": {
-            Username: "1",
-            Password: "hunter3",
-            UserStatus: "UNCONFIRMED",
-            ConfirmationCode: "1234",
+          '1': {
+            Username: '1',
+            Password: 'hunter3',
+            UserStatus: 'UNCONFIRMED',
+            ConfirmationCode: '1234',
             Attributes: [
-              { Name: "sub", Value: "1" },
-              { Name: "email", Value: "example@example.com" },
+              { Name: 'sub', Value: '1' },
+              { Name: 'email', Value: 'example@example.com' },
             ],
             UserLastModifiedDate: now,
             UserCreateDate: now,
@@ -117,27 +111,27 @@ describe("User Pool Client", () => {
       });
 
       await userPool.saveUser({
-        Username: "1",
-        Password: "hunter3",
-        UserStatus: "CONFIRMED",
-        Attributes: [{ Name: "email", Value: "example@example.com" }],
+        Username: '1',
+        Password: 'hunter3',
+        UserStatus: 'CONFIRMED',
+        Attributes: [{ Name: 'email', Value: 'example@example.com' }],
         UserLastModifiedDate: now,
         UserCreateDate: now,
         Enabled: true,
       });
 
-      file = JSON.parse(await readFile(path + "/local.json", "utf-8"));
+      file = JSON.parse(await readFile(`${path}/local.json`, 'utf-8'));
 
       expect(file).toEqual({
-        Options: { Id: "local", UsernameAttributes: [] },
+        Options: { Id: 'local', UsernameAttributes: [] },
         Users: {
-          "1": {
-            Username: "1",
-            Password: "hunter3",
-            UserStatus: "CONFIRMED",
+          '1': {
+            Username: '1',
+            Password: 'hunter3',
+            UserStatus: 'CONFIRMED',
             Attributes: [
-              { Name: "sub", Value: "1" },
-              { Name: "email", Value: "example@example.com" },
+              { Name: 'sub', Value: '1' },
+              { Name: 'email', Value: 'example@example.com' },
             ],
             UserLastModifiedDate: now,
             UserCreateDate: now,
@@ -148,18 +142,18 @@ describe("User Pool Client", () => {
     });
   });
 
-  describe("getUserByUsername", () => {
+  describe('getUserByUsername', () => {
     let userPool: UserPoolClient;
     beforeAll(async () => {
-      userPool = await cognitoClient.getUserPool("local");
+      userPool = await cognitoClient.getUserPool('local');
 
       await userPool.saveUser({
-        Username: "1",
-        Password: "hunter2",
-        UserStatus: "UNCONFIRMED",
+        Username: '1',
+        Password: 'hunter2',
+        UserStatus: 'UNCONFIRMED',
         Attributes: [
-          { Name: "email", Value: "example@example.com" },
-          { Name: "phone_number", Value: "0411000111" },
+          { Name: 'email', Value: 'example@example.com' },
+          { Name: 'phone_number', Value: '0411000111' },
         ],
         UserCreateDate: new Date().getTime(),
         UserLastModifiedDate: new Date().getTime(),
@@ -168,34 +162,34 @@ describe("User Pool Client", () => {
     });
 
     it("returns null if user doesn't exist", async () => {
-      const user = await userPool.getUserByUsername("invalid");
+      const user = await userPool.getUserByUsername('invalid');
 
       expect(user).toBeNull();
     });
 
-    it("returns existing user by their sub attribute", async () => {
-      const user = await userPool.getUserByUsername("1");
+    it('returns existing user by their sub attribute', async () => {
+      const user = await userPool.getUserByUsername('1');
 
       expect(user).not.toBeNull();
-      expect(user?.Username).toEqual("1");
+      expect(user?.Username).toEqual('1');
     });
   });
 
-  describe("listUsers", () => {
+  describe('listUsers', () => {
     let userPool: UserPoolClient;
     let now: Date;
 
     beforeAll(async () => {
       now = new Date();
-      userPool = await cognitoClient.getUserPool("local");
+      userPool = await cognitoClient.getUserPool('local');
 
       await userPool.saveUser({
-        Username: "1",
-        Password: "hunter2",
-        UserStatus: "UNCONFIRMED",
+        Username: '1',
+        Password: 'hunter2',
+        UserStatus: 'UNCONFIRMED',
         Attributes: [
-          { Name: "email", Value: "example@example.com" },
-          { Name: "phone_number", Value: "0411000111" },
+          { Name: 'email', Value: 'example@example.com' },
+          { Name: 'phone_number', Value: '0411000111' },
         ],
         UserCreateDate: now.getTime(),
         UserLastModifiedDate: now.getTime(),
@@ -203,9 +197,9 @@ describe("User Pool Client", () => {
       });
 
       await userPool.saveUser({
-        Username: "2",
-        Password: "password1",
-        UserStatus: "UNCONFIRMED",
+        Username: '2',
+        Password: 'password1',
+        UserStatus: 'UNCONFIRMED',
         Attributes: [],
         UserCreateDate: now.getTime(),
         UserLastModifiedDate: now.getTime(),
@@ -213,28 +207,28 @@ describe("User Pool Client", () => {
       });
     });
 
-    it("returns all users", async () => {
+    it('returns all users', async () => {
       const users = await userPool.listUsers();
 
       expect(users).toEqual([
         {
-          Username: "1",
-          Password: "hunter2",
-          UserStatus: "UNCONFIRMED",
+          Username: '1',
+          Password: 'hunter2',
+          UserStatus: 'UNCONFIRMED',
           Attributes: [
-            { Name: "sub", Value: "1" },
-            { Name: "email", Value: "example@example.com" },
-            { Name: "phone_number", Value: "0411000111" },
+            { Name: 'sub', Value: '1' },
+            { Name: 'email', Value: 'example@example.com' },
+            { Name: 'phone_number', Value: '0411000111' },
           ],
           UserCreateDate: now.getTime(),
           UserLastModifiedDate: now.getTime(),
           Enabled: true,
         },
         {
-          Username: "2",
-          Password: "password1",
-          UserStatus: "UNCONFIRMED",
-          Attributes: [{ Name: "sub", Value: "2" }],
+          Username: '2',
+          Password: 'password1',
+          UserStatus: 'UNCONFIRMED',
+          Attributes: [{ Name: 'sub', Value: '2' }],
           UserCreateDate: now.getTime(),
           UserLastModifiedDate: now.getTime(),
           Enabled: true,

@@ -1,7 +1,7 @@
 {
   "name": "cognito-mock",
   "description": "Fork from cognito-local",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
   "bin": "lib/bin/start.js",
   "main": "lib/index.js",
@@ -23,7 +23,8 @@
     "start:watch": "nodemon",
     "test": "jest",
     "test:watch": "jest --watch",
-    "semantic-release": "semantic-release"
+    "semantic-release": "semantic-release",
+    "ts-node": "ts-node"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
@@ -44,11 +45,18 @@
     "@types/jsonwebtoken": "^8.3.9",
     "@types/supertest": "^2.0.8",
     "@types/uuid": "^7.0.2",
-    "@typescript-eslint/eslint-plugin": "^2.27.0",
-    "@typescript-eslint/parser": "^2.27.0",
+    "@typescript-eslint/eslint-plugin": "^4.26.1",
+    "@typescript-eslint/parser": "^4.26.1",
     "babel-plugin-inline-json-import": "^0.3.2",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.10.1",
+    "eslint": "^7.28.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-jsx-conditionals": "^2.0.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-react": "^7.24.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "husky": "^4.2.5",
     "jest": "^25.3.0",
     "jest-date-mock": "^1.0.8",
@@ -57,6 +65,7 @@
     "prettier": "^2.0.4",
     "semantic-release": "^17.0.4",
     "supertest": "^4.0.2",
+    "ts-node": "^10.0.0",
     "typescript": "^3.8.3"
   },
   "dependencies": {
@@ -70,7 +79,8 @@
     "jsonwebtoken": "^8.5.1",
     "short-uuid": "^3.1.1",
     "stormdb": "^0.3.0",
-    "uuid": "^7.0.3"
+    "uuid": "^7.0.3",
+    "yargs": "^17.0.1"
   },
   "nodemonConfig": {
     "ignore": [

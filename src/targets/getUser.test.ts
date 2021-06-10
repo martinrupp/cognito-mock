@@ -1,13 +1,13 @@
-import { advanceTo } from "jest-date-mock";
-import jwt from "jsonwebtoken";
-import * as uuid from "uuid";
-import { InvalidParameterError } from "../errors";
-import PrivateKey from "../keys/cognitoMock.private.json";
-import { CognitoClient, UserPoolClient } from "../services";
-import { Triggers } from "../services/triggers";
-import { GetUser, GetUserTarget } from "./getUser";
+import { advanceTo } from 'jest-date-mock';
+import jwt from 'jsonwebtoken';
+import * as uuid from 'uuid';
+import { InvalidParameterError } from '../errors';
+import PrivateKey from '../keys/cognitoMock.private.json';
+import { CognitoClient, UserPoolClient } from '../services';
+import { Triggers } from '../services/triggers';
+import { GetUser, GetUserTarget } from './getUser';
 
-describe("GetUser target", () => {
+describe('GetUser target', () => {
   let getUser: GetUserTarget;
   let mockCognitoClient: jest.Mocked<CognitoClient>;
   let mockUserPoolClient: jest.Mocked<UserPoolClient>;
@@ -21,7 +21,7 @@ describe("GetUser target", () => {
 
     mockUserPoolClient = {
       config: {
-        Id: "test",
+        Id: 'test',
       },
       createAppClient: jest.fn(),
       getUserByUsername: jest.fn(),
@@ -46,52 +46,52 @@ describe("GetUser target", () => {
     });
   });
 
-  it("parses token get user by sub", async () => {
+  it('parses token get user by sub', async () => {
     mockUserPoolClient.getUserByUsername.mockResolvedValue({
       Attributes: [],
-      UserStatus: "CONFIRMED",
-      Password: "hunter2",
-      Username: "0000-0000",
+      UserStatus: 'CONFIRMED',
+      Password: 'hunter2',
+      Username: '0000-0000',
       Enabled: true,
       UserCreateDate: new Date().getTime(),
       UserLastModifiedDate: new Date().getTime(),
-      ConfirmationCode: "1234",
+      ConfirmationCode: '1234',
     });
 
     const output = await getUser({
       AccessToken: jwt.sign(
         {
-          sub: "0000-0000",
-          event_id: "0",
-          token_use: "access",
-          scope: "aws.cognito.signin.user.admin",
+          sub: '0000-0000',
+          event_id: '0',
+          token_use: 'access',
+          scope: 'aws.cognito.signin.user.admin',
           auth_time: new Date(),
           jti: uuid.v4(),
-          client_id: "test",
-          username: "0000-0000",
+          client_id: 'test',
+          username: '0000-0000',
         },
         PrivateKey.pem,
         {
-          algorithm: "RS256",
+          algorithm: 'RS256',
           issuer: `http://localhost:9229/test`,
-          expiresIn: "24h",
-          keyid: "CognitoMock",
-        }
+          expiresIn: '24h',
+          keyid: 'CognitoMock',
+        },
       ),
     });
 
     expect(output).toBeDefined();
     expect(output).toEqual({
       UserAttributes: [],
-      Username: "0000-0000",
+      Username: '0000-0000',
     });
   });
 
   it("throws if token isn't valid", async () => {
     await expect(
       getUser({
-        AccessToken: "blah",
-      })
+        AccessToken: 'blah',
+      }),
     ).rejects.toBeInstanceOf(InvalidParameterError);
   });
 
@@ -101,22 +101,22 @@ describe("GetUser target", () => {
     const output = await getUser({
       AccessToken: jwt.sign(
         {
-          sub: "0000-0000",
-          event_id: "0",
-          token_use: "access",
-          scope: "aws.cognito.signin.user.admin",
+          sub: '0000-0000',
+          event_id: '0',
+          token_use: 'access',
+          scope: 'aws.cognito.signin.user.admin',
           auth_time: new Date(),
           jti: uuid.v4(),
-          client_id: "test",
-          username: "0000-0000",
+          client_id: 'test',
+          username: '0000-0000',
         },
         PrivateKey.pem,
         {
-          algorithm: "RS256",
+          algorithm: 'RS256',
           issuer: `http://localhost:9229/test`,
-          expiresIn: "24h",
-          keyid: "CognitoMock",
-        }
+          expiresIn: '24h',
+          keyid: 'CognitoMock',
+        },
       ),
     });
 

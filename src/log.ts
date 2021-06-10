@@ -1,6 +1,6 @@
-import debug from "debug";
+import debug from 'debug';
 
-const logger = debug("CognitoMock");
+const logger = debug('CognitoMock');
 
 export default {
   info: console.log,

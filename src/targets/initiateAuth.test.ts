@@ -1,24 +1,15 @@
-import { advanceTo } from "jest-date-mock";
-import jwt from "jsonwebtoken";
-import {
-  InvalidPasswordError,
-  NotAuthorizedError,
-  PasswordResetRequiredError,
-} from "../errors";
-import PublicKey from "../keys/cognitoMock.public.json";
-import { CognitoClient, UserPoolClient } from "../services";
-import { Triggers } from "../services/triggers";
-import { User } from "../services/userPoolClient";
-import {
-  InitiateAuth,
-  InitiateAuthTarget,
-  PasswordVerifierOutput,
-  SmsMfaOutput,
-} from "./initiateAuth";
+import { advanceTo } from 'jest-date-mock';
+import jwt from 'jsonwebtoken';
+import { InvalidPasswordError, NotAuthorizedError, PasswordResetRequiredError } from '../errors';
+import PublicKey from '../keys/cognitoMock.public.json';
+import { CognitoClient, UserPoolClient } from '../services';
+import { Triggers } from '../services/triggers';
+import { User } from '../services/userPoolClient';
+import { InitiateAuth, InitiateAuthTarget, PasswordVerifierOutput, SmsMfaOutput } from './initiateAuth';
 
 const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
 
-describe("InitiateAuth target", () => {
+describe('InitiateAuth target', () => {
   let initiateAuth: InitiateAuthTarget;
   let mockCognitoClient: jest.Mocked<CognitoClient>;
   let mockUserPoolClient: jest.Mocked<UserPoolClient>;
@@ -32,7 +23,7 @@ describe("InitiateAuth target", () => {
 
     mockUserPoolClient = {
       config: {
-        Id: "test",
+        Id: 'test',
       },
       createAppClient: jest.fn(),
       getUserByUsername: jest.fn(),
@@ -57,13 +48,13 @@ describe("InitiateAuth target", () => {
     });
   });
 
-  describe("USER_PASSWORD_AUTH auth flow", () => {
-    it("throws if password is incorrect", async () => {
+  describe('USER_PASSWORD_AUTH auth flow', () => {
+    it('throws if password is incorrect', async () => {
       mockUserPoolClient.getUserByUsername.mockResolvedValue({
         Attributes: [],
-        UserStatus: "CONFIRMED",
-        Password: "hunter2",
-        Username: "0000-0000",
+        UserStatus: 'CONFIRMED',
+        Password: 'hunter2',
+        Username: '0000-0000',
         Enabled: true,
         UserCreateDate: new Date().getTime(),
         UserLastModifiedDate: new Date().getTime(),
@@ -71,23 +62,23 @@ describe("InitiateAuth target", () => {
 
       await expect(
         initiateAuth({
-          ClientId: "clientId",
-          AuthFlow: "USER_PASSWORD_AUTH",
+          ClientId: 'clientId',
+          AuthFlow: 'USER_PASSWORD_AUTH',
           AuthParameters: {
-            USERNAME: "0000-0000",
-            PASSWORD: "bad-password",
+            USERNAME: '0000-0000',
+            PASSWORD: 'bad-password',
           },
-          Session: "Session",
-        })
+          Session: 'Session',
+        }),
       ).rejects.toBeInstanceOf(InvalidPasswordError);
     });
 
-    it("throws when user requires reset", async () => {
+    it('throws when user requires reset', async () => {
       mockUserPoolClient.getUserByUsername.mockResolvedValue({
         Attributes: [],
-        UserStatus: "RESET_REQUIRED",
-        Password: "hunter2",
-        Username: "0000-0000",
+        UserStatus: 'RESET_REQUIRED',
+        Password: 'hunter2',
+        Username: '0000-0000',
         Enabled: true,
         UserCreateDate: new Date().getTime(),
         UserLastModifiedDate: new Date().getTime(),
@@ -95,25 +86,25 @@ describe("InitiateAuth target", () => {
 
       await expect(
         initiateAuth({
-          ClientId: "clientId",
-          AuthFlow: "USER_PASSWORD_AUTH",
+          ClientId: 'clientId',
+          AuthFlow: 'USER_PASSWORD_AUTH',
           AuthParameters: {
-            USERNAME: "0000-0000",
-            PASSWORD: "bad-password",
+            USERNAME: '0000-0000',
+            PASSWORD: 'bad-password',
           },
-          Session: "Session",
-        })
+          Session: 'Session',
+        }),
       ).rejects.toBeInstanceOf(PasswordResetRequiredError);
     });
 
     describe("when user doesn't exist", () => {
-      describe("when User Migration trigger is enabled", () => {
-        it("invokes the User Migration trigger and continues", async () => {
+      describe('when User Migration trigger is enabled', () => {
+        it('invokes the User Migration trigger and continues', async () => {
           mockTriggers.enabled.mockReturnValue(true);
           mockTriggers.userMigration.mockResolvedValue({
-            Username: "0000-000",
-            UserStatus: "CONFIRMED",
-            Password: "hunter2",
+            Username: '0000-000',
+            UserStatus: 'CONFIRMED',
+            Password: 'hunter2',
             UserLastModifiedDate: new Date().getTime(),
             UserCreateDate: new Date().getTime(),
             Enabled: true,
@@ -122,100 +113,100 @@ describe("InitiateAuth target", () => {
           mockUserPoolClient.getUserByUsername.mockResolvedValue(null);
 
           const output = (await initiateAuth({
-            ClientId: "clientId",
-            AuthFlow: "USER_PASSWORD_AUTH",
+            ClientId: 'clientId',
+            AuthFlow: 'USER_PASSWORD_AUTH',
             AuthParameters: {
-              USERNAME: "0000-0000",
-              PASSWORD: "hunter2",
+              USERNAME: '0000-0000',
+              PASSWORD: 'hunter2',
             },
-            Session: "Session",
+            Session: 'Session',
           })) as PasswordVerifierOutput;
 
           expect(output).toBeDefined();
-          expect(output.Session).toBe("Session");
+          expect(output.Session).toBe('Session');
           expect(output.AuthenticationResult.AccessToken).toBeDefined();
         });
       });
 
-      describe("when User Migration trigger is disabled", () => {
-        it("throws", async () => {
+      describe('when User Migration trigger is disabled', () => {
+        it('throws', async () => {
           mockTriggers.enabled.mockReturnValue(false);
           mockUserPoolClient.getUserByUsername.mockResolvedValue(null);
 
           await expect(
             initiateAuth({
-              ClientId: "clientId",
-              AuthFlow: "USER_PASSWORD_AUTH",
+              ClientId: 'clientId',
+              AuthFlow: 'USER_PASSWORD_AUTH',
               AuthParameters: {
-                USERNAME: "0000-0000",
-                PASSWORD: "hunter2",
+                USERNAME: '0000-0000',
+                PASSWORD: 'hunter2',
               },
-              Session: "Session",
-            })
+              Session: 'Session',
+            }),
           ).rejects.toBeInstanceOf(NotAuthorizedError);
         });
       });
     });
 
-    describe("when password matches", () => {
-      describe("when MFA is ON", () => {
+    describe('when password matches', () => {
+      describe('when MFA is ON', () => {
         beforeEach(() => {
-          mockUserPoolClient.config.MfaConfiguration = "ON";
+          mockUserPoolClient.config.MfaConfiguration = 'ON';
         });
 
-        describe("when user has SMS_MFA configured", () => {
+        describe('when user has SMS_MFA configured', () => {
           let user: User;
 
           beforeEach(() => {
             user = {
               Attributes: [
                 {
-                  Name: "phone_number",
-                  Value: "0411000111",
+                  Name: 'phone_number',
+                  Value: '0411000111',
                 },
               ],
-              UserStatus: "CONFIRMED",
-              Password: "hunter2",
-              Username: "0000-0000",
+              UserStatus: 'CONFIRMED',
+              Password: 'hunter2',
+              Username: '0000-0000',
               Enabled: true,
               UserCreateDate: new Date().getTime(),
               UserLastModifiedDate: new Date().getTime(),
               MFAOptions: [
                 {
-                  DeliveryMedium: "SMS",
-                  AttributeName: "phone_number",
+                  DeliveryMedium: 'SMS',
+                  AttributeName: 'phone_number',
                 },
               ],
             };
             mockUserPoolClient.getUserByUsername.mockResolvedValue(user);
           });
 
-          it("sends MFA code to user", async () => {
-            mockCodeDelivery.mockResolvedValue("abc");
+          it('sends MFA code to user', async () => {
+            mockCodeDelivery.mockResolvedValue('abc');
 
             const output = (await initiateAuth({
-              ClientId: "clientId",
-              AuthFlow: "USER_PASSWORD_AUTH",
+              ClientId: 'clientId',
+              AuthFlow: 'USER_PASSWORD_AUTH',
               AuthParameters: {
-                USERNAME: "0000-0000",
-                PASSWORD: "hunter2",
+                USERNAME: '0000-0000',
+                PASSWORD: 'hunter2',
               },
-              Session: "Session",
+              Session: 'Session',
             })) as SmsMfaOutput;
 
             expect(output).toBeDefined();
-            expect(output.Session).toBe("Session");
+            expect(output.Session).toBe('Session');
 
             expect(mockCodeDelivery).toHaveBeenCalledWith(user, {
-              AttributeName: "phone_number",
-              DeliveryMedium: "SMS",
-              Destination: "0411000111",
+              AttributeName: 'phone_number',
+              DeliveryMedium: 'SMS',
+              Destination: '0411000111',
             });
 
             // also saves the code on the user for comparison later
             expect(mockUserPoolClient.saveUser).toHaveBeenCalledWith({
               ...user,
-              MFACode: "abc",
+              MFACode: 'abc',
             });
           });
         });
@@ -224,89 +215,89 @@ describe("InitiateAuth target", () => {
           beforeEach(() => {
             mockUserPoolClient.getUserByUsername.mockResolvedValue({
               Attributes: [],
-              UserStatus: "CONFIRMED",
-              Password: "hunter2",
-              Username: "0000-0000",
+              UserStatus: 'CONFIRMED',
+              Password: 'hunter2',
+              Username: '0000-0000',
               Enabled: true,
               UserCreateDate: new Date().getTime(),
               UserLastModifiedDate: new Date().getTime(),
             });
           });
 
-          it("throws an exception", async () => {
+          it('throws an exception', async () => {
             await expect(
               initiateAuth({
-                ClientId: "clientId",
-                AuthFlow: "USER_PASSWORD_AUTH",
+                ClientId: 'clientId',
+                AuthFlow: 'USER_PASSWORD_AUTH',
                 AuthParameters: {
-                  USERNAME: "0000-0000",
-                  PASSWORD: "hunter2",
+                  USERNAME: '0000-0000',
+                  PASSWORD: 'hunter2',
                 },
-                Session: "Session",
-              })
+                Session: 'Session',
+              }),
             ).rejects.toBeInstanceOf(NotAuthorizedError);
           });
         });
       });
 
-      describe("when MFA is OPTIONAL", () => {
+      describe('when MFA is OPTIONAL', () => {
         beforeEach(() => {
-          mockUserPoolClient.config.MfaConfiguration = "OPTIONAL";
+          mockUserPoolClient.config.MfaConfiguration = 'OPTIONAL';
         });
 
-        describe("when user has SMS_MFA configured", () => {
+        describe('when user has SMS_MFA configured', () => {
           let user: User;
 
           beforeEach(() => {
             user = {
               Attributes: [
                 {
-                  Name: "phone_number",
-                  Value: "0411000111",
+                  Name: 'phone_number',
+                  Value: '0411000111',
                 },
               ],
-              UserStatus: "CONFIRMED",
-              Password: "hunter2",
-              Username: "0000-0000",
+              UserStatus: 'CONFIRMED',
+              Password: 'hunter2',
+              Username: '0000-0000',
               Enabled: true,
               UserCreateDate: new Date().getTime(),
               UserLastModifiedDate: new Date().getTime(),
               MFAOptions: [
                 {
-                  DeliveryMedium: "SMS",
-                  AttributeName: "phone_number",
+                  DeliveryMedium: 'SMS',
+                  AttributeName: 'phone_number',
                 },
               ],
             };
             mockUserPoolClient.getUserByUsername.mockResolvedValue(user);
           });
 
-          it("sends MFA code to user", async () => {
-            mockCodeDelivery.mockResolvedValue("abc");
+          it('sends MFA code to user', async () => {
+            mockCodeDelivery.mockResolvedValue('abc');
 
             const output = (await initiateAuth({
-              ClientId: "clientId",
-              AuthFlow: "USER_PASSWORD_AUTH",
+              ClientId: 'clientId',
+              AuthFlow: 'USER_PASSWORD_AUTH',
               AuthParameters: {
-                USERNAME: "0000-0000",
-                PASSWORD: "hunter2",
+                USERNAME: '0000-0000',
+                PASSWORD: 'hunter2',
               },
-              Session: "Session",
+              Session: 'Session',
             })) as SmsMfaOutput;
 
             expect(output).toBeDefined();
-            expect(output.Session).toBe("Session");
+            expect(output.Session).toBe('Session');
 
             expect(mockCodeDelivery).toHaveBeenCalledWith(user, {
-              AttributeName: "phone_number",
-              DeliveryMedium: "SMS",
-              Destination: "0411000111",
+              AttributeName: 'phone_number',
+              DeliveryMedium: 'SMS',
+              Destination: '0411000111',
             });
 
             // also saves the code on the user for comparison later
             expect(mockUserPoolClient.saveUser).toHaveBeenCalledWith({
               ...user,
-              MFACode: "abc",
+              MFACode: 'abc',
             });
           });
         });
@@ -315,156 +306,144 @@ describe("InitiateAuth target", () => {
           beforeEach(() => {
             mockUserPoolClient.getUserByUsername.mockResolvedValue({
               Attributes: [
-                { Name: "sub", Value: "0000-0000" },
-                { Name: "email", Value: "example@example.com" },
+                { Name: 'sub', Value: '0000-0000' },
+                { Name: 'email', Value: 'example@example.com' },
               ],
-              UserStatus: "CONFIRMED",
-              Password: "hunter2",
-              Username: "0000-0000",
+              UserStatus: 'CONFIRMED',
+              Password: 'hunter2',
+              Username: '0000-0000',
               Enabled: true,
               UserCreateDate: new Date().getTime(),
               UserLastModifiedDate: new Date().getTime(),
             });
           });
 
-          it("generates tokens", async () => {
+          it('generates tokens', async () => {
             const output = (await initiateAuth({
-              ClientId: "clientId",
-              AuthFlow: "USER_PASSWORD_AUTH",
+              ClientId: 'clientId',
+              AuthFlow: 'USER_PASSWORD_AUTH',
               AuthParameters: {
-                USERNAME: "0000-0000",
-                PASSWORD: "hunter2",
+                USERNAME: '0000-0000',
+                PASSWORD: 'hunter2',
               },
-              Session: "Session",
+              Session: 'Session',
             })) as PasswordVerifierOutput;
 
             expect(output).toBeDefined();
-            expect(output.Session).toBe("Session");
+            expect(output.Session).toBe('Session');
 
             // access token
             expect(output.AuthenticationResult.AccessToken).toBeDefined();
-            const decodedAccessToken = jwt.decode(
-              output.AuthenticationResult.AccessToken
-            );
+            const decodedAccessToken = jwt.decode(output.AuthenticationResult.AccessToken);
             expect(decodedAccessToken).toMatchObject({
-              client_id: "clientId",
-              iss: "http://localhost:9229/test",
-              sub: "0000-0000",
-              token_use: "access",
-              username: "0000-0000",
+              client_id: 'clientId',
+              iss: 'http://localhost:9229/test',
+              sub: '0000-0000',
+              token_use: 'access',
+              username: '0000-0000',
               event_id: expect.stringMatching(UUID),
-              scope: "aws.cognito.signin.user.admin", // TODO: scopes
+              scope: 'aws.cognito.signin.user.admin', // TODO: scopes
               auth_time: now.getTime(),
               jti: expect.stringMatching(UUID),
             });
             expect(
-              jwt.verify(
-                output.AuthenticationResult.AccessToken,
-                PublicKey.pem,
-                {
-                  algorithms: ["RS256"],
-                }
-              )
+              jwt.verify(output.AuthenticationResult.AccessToken, PublicKey.pem, {
+                algorithms: ['RS256'],
+              }),
             ).toBeTruthy();
 
             // id token
             expect(output.AuthenticationResult.IdToken).toBeDefined();
-            const decodedIdToken = jwt.decode(
-              output.AuthenticationResult.IdToken
-            );
+            const decodedIdToken = jwt.decode(output.AuthenticationResult.IdToken);
             expect(decodedIdToken).toMatchObject({
-              aud: "clientId",
-              iss: "http://localhost:9229/test",
-              sub: "0000-0000",
-              token_use: "id",
-              "cognito:username": "0000-0000",
+              aud: 'clientId',
+              iss: 'http://localhost:9229/test',
+              sub: '0000-0000',
+              token_use: 'id',
+              'cognito:username': '0000-0000',
               email_verified: true,
               event_id: expect.stringMatching(UUID),
               auth_time: now.getTime(),
-              email: "example@example.com",
+              email: 'example@example.com',
             });
             expect(
               jwt.verify(output.AuthenticationResult.IdToken, PublicKey.pem, {
-                algorithms: ["RS256"],
-              })
+                algorithms: ['RS256'],
+              }),
             ).toBeTruthy();
           });
         });
       });
 
-      describe("when MFA is OFF", () => {
+      describe('when MFA is OFF', () => {
         beforeEach(() => {
-          mockUserPoolClient.config.MfaConfiguration = "OFF";
+          mockUserPoolClient.config.MfaConfiguration = 'OFF';
         });
 
-        it("generates tokens", async () => {
+        it('generates tokens', async () => {
           mockUserPoolClient.getUserByUsername.mockResolvedValue({
             Attributes: [
-              { Name: "sub", Value: "0000-0000" },
-              { Name: "email", Value: "example@example.com" },
+              { Name: 'sub', Value: '0000-0000' },
+              { Name: 'email', Value: 'example@example.com' },
             ],
-            UserStatus: "CONFIRMED",
-            Password: "hunter2",
-            Username: "0000-0000",
+            UserStatus: 'CONFIRMED',
+            Password: 'hunter2',
+            Username: '0000-0000',
             Enabled: true,
             UserCreateDate: new Date().getTime(),
             UserLastModifiedDate: new Date().getTime(),
           });
           const output = (await initiateAuth({
-            ClientId: "clientId",
-            AuthFlow: "USER_PASSWORD_AUTH",
+            ClientId: 'clientId',
+            AuthFlow: 'USER_PASSWORD_AUTH',
             AuthParameters: {
-              USERNAME: "0000-0000",
-              PASSWORD: "hunter2",
+              USERNAME: '0000-0000',
+              PASSWORD: 'hunter2',
             },
-            Session: "Session",
+            Session: 'Session',
           })) as PasswordVerifierOutput;
 
           expect(output).toBeDefined();
-          expect(output.Session).toBe("Session");
+          expect(output.Session).toBe('Session');
 
           // access token
           expect(output.AuthenticationResult.AccessToken).toBeDefined();
-          const decodedAccessToken = jwt.decode(
-            output.AuthenticationResult.AccessToken
-          );
+          const decodedAccessToken = jwt.decode(output.AuthenticationResult.AccessToken);
           expect(decodedAccessToken).toMatchObject({
-            client_id: "clientId",
-            iss: "http://localhost:9229/test",
-            sub: "0000-0000",
-            token_use: "access",
-            username: "0000-0000",
+            client_id: 'clientId',
+            iss: 'http://localhost:9229/test',
+            sub: '0000-0000',
+            token_use: 'access',
+            username: '0000-0000',
             event_id: expect.stringMatching(UUID),
-            scope: "aws.cognito.signin.user.admin", // TODO: scopes
+            scope: 'aws.cognito.signin.user.admin', // TODO: scopes
             auth_time: now.getTime(),
             jti: expect.stringMatching(UUID),
           });
           expect(
             jwt.verify(output.AuthenticationResult.AccessToken, PublicKey.pem, {
-              algorithms: ["RS256"],
-            })
+              algorithms: ['RS256'],
+            }),
           ).toBeTruthy();
 
           // id token
           expect(output.AuthenticationResult.IdToken).toBeDefined();
-          const decodedIdToken = jwt.decode(
-            output.AuthenticationResult.IdToken
-          );
+          const decodedIdToken = jwt.decode(output.AuthenticationResult.IdToken);
           expect(decodedIdToken).toMatchObject({
-            aud: "clientId",
-            iss: "http://localhost:9229/test",
-            sub: "0000-0000",
-            token_use: "id",
-            "cognito:username": "0000-0000",
+            aud: 'clientId',
+            iss: 'http://localhost:9229/test',
+            sub: '0000-0000',
+            token_use: 'id',
+            'cognito:username': '0000-0000',
             email_verified: true,
             event_id: expect.stringMatching(UUID),
             auth_time: now.getTime(),
-            email: "example@example.com",
+            email: 'example@example.com',
           });
           expect(
             jwt.verify(output.AuthenticationResult.IdToken, PublicKey.pem, {
-              algorithms: ["RS256"],
-            })
+              algorithms: ['RS256'],
+            }),
           ).toBeTruthy();
         });
       });

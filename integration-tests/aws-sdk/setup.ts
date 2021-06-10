@@ -1,37 +1,35 @@
-import * as AWS from "aws-sdk";
-import fs from "fs";
-import http from "http";
-import { promisify } from "util";
-import { createServer } from "../../src/server";
-import { CodeDelivery } from "../../src/services";
-import { createCognitoClient } from "../../src/services/cognitoClient";
-import { createDataStore, CreateDataStore } from "../../src/services/dataStore";
-import { Lambda } from "../../src/services/lambda";
-import { createTriggers } from "../../src/services/triggers";
-import { createUserPoolClient } from "../../src/services/userPoolClient";
-import { Router } from "../../src/targets/router";
+import * as AWS from 'aws-sdk';
+import fs from 'fs';
+import http from 'http';
+import { promisify } from 'util';
+import { createServer } from '../../src/server';
+import { CodeDelivery } from '../../src/services';
+import { createCognitoClient } from '../../src/services/cognitoClient';
+import { createDataStore, CreateDataStore } from '../../src/services/dataStore';
+import { Lambda } from '../../src/services/lambda';
+import { createTriggers } from '../../src/services/triggers';
+import { createUserPoolClient } from '../../src/services/userPoolClient';
+import { Router } from '../../src/targets/router';
 
 const mkdtemp = promisify(fs.mkdtemp);
 const rmdir = promisify(fs.rmdir);
 
-export const withCognitoSdk = (
-  fn: (cognito: () => AWS.CognitoIdentityServiceProvider) => void
-) => () => {
+export const withCognitoSdk = (fn: (cognito: () => AWS.CognitoIdentityServiceProvider) => void) => () => {
   let path: string;
   let tmpCreateDataStore: CreateDataStore;
   let httpServer: http.Server;
   let cognitoSdk: AWS.CognitoIdentityServiceProvider;
 
   beforeEach(async () => {
-    path = await mkdtemp("/tmp/cognito-mock:");
+    path = await mkdtemp('/tmp/cognito-mock:');
     tmpCreateDataStore = (id, defaults) => createDataStore(id, defaults, path);
     const cognitoClient = await createCognitoClient(
       {
-        Id: "integration-test",
+        Id: 'integration-test',
         UsernameAttributes: [],
       },
       tmpCreateDataStore,
-      createUserPoolClient
+      createUserPoolClient,
     );
     const mockLambda: jest.Mocked<Lambda> = {
       enabled: jest.fn().mockReturnValue(false),
@@ -54,17 +52,14 @@ export const withCognitoSdk = (
     });
 
     const address = httpServer.address()!;
-    const url =
-      typeof address === "string"
-        ? address
-        : `${address.address}:${address.port}`;
+    const url = typeof address === 'string' ? address : `${address.address}:${address.port}`;
 
     cognitoSdk = new AWS.CognitoIdentityServiceProvider({
       credentials: {
-        accessKeyId: "local",
-        secretAccessKey: "local",
+        accessKeyId: 'local',
+        secretAccessKey: 'local',
       },
-      region: "local",
+      region: 'local',
       endpoint: `http://${url}`,
     });
   });

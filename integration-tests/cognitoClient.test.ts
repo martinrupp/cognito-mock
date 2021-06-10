@@ -1,34 +1,34 @@
-import { createCognitoClient } from "../src/services/cognitoClient";
-import { CreateDataStore, createDataStore } from "../src/services/dataStore";
-import { createUserPoolClient } from "../src/services/userPoolClient";
-import fs from "fs";
-import { promisify } from "util";
+import fs from 'fs';
+import { promisify } from 'util';
+import { createCognitoClient } from '../src/services/cognitoClient';
+import { CreateDataStore, createDataStore } from '../src/services/dataStore';
+import { createUserPoolClient } from '../src/services/userPoolClient';
 
 const mkdtemp = promisify(fs.mkdtemp);
 const rmdir = promisify(fs.rmdir);
 
-describe("Cognito Client", () => {
+describe('Cognito Client', () => {
   let path: string;
   let tmpCreateDataStore: CreateDataStore;
   beforeEach(async () => {
-    path = await mkdtemp("/tmp/cognito-mock:");
+    path = await mkdtemp('/tmp/cognito-mock:');
     tmpCreateDataStore = (id, defaults) => createDataStore(id, defaults, path);
   });
 
   afterEach(() =>
     rmdir(path, {
       recursive: true,
-    })
+    }),
   );
 
-  it("creates a clients database", async () => {
+  it('creates a clients database', async () => {
     await createCognitoClient(
       {
-        Id: "local",
+        Id: 'local',
         UsernameAttributes: [],
       },
       tmpCreateDataStore,
-      createUserPoolClient
+      createUserPoolClient,
     );
 
     expect(fs.existsSync(`${path}/clients.json`)).toBe(true);
