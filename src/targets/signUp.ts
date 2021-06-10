@@ -28,6 +28,7 @@ export const SignUp = ({ cognitoClient, codeDelivery }: Services): SignUpTarget 
   // is enabled on the user pool. This will be the default after Feb 2020.
   // See: https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pool-managing-errors.html
   const userPool = await cognitoClient.getUserPoolForClientId(body.ClientId);
+
   const existingUser = await userPool.getUserByUsername(body.Username);
   if (existingUser) {
     throw new UsernameExistsError();
@@ -39,7 +40,7 @@ export const SignUp = ({ cognitoClient, codeDelivery }: Services): SignUpTarget 
     Password: body.Password,
     UserCreateDate: new Date().getTime(),
     UserLastModifiedDate: new Date().getTime(),
-    UserStatus: 'UNCONFIRMED',
+    UserStatus: userPool.config.AutoConfirmed ? 'CONFIRMED' : 'UNCONFIRMED',
     Username: uuid.v4(),
   };
 

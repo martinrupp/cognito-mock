@@ -1,7 +1,7 @@
-import * as AWS from 'aws-sdk';
 import fs from 'fs';
 import http from 'http';
 import { promisify } from 'util';
+import * as AWS from 'aws-sdk';
 import { createServer } from '../../src/server';
 import { CodeDelivery } from '../../src/services';
 import { createCognitoClient } from '../../src/services/cognitoClient';

@@ -1,7 +1,7 @@
 {
   "name": "cognito-mock",
   "description": "Fork from cognito-local",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "license": "MIT",
   "bin": "lib/bin/start.js",
   "main": "lib/index.js",
@@ -19,7 +19,7 @@
     "integration-test": "jest --config integration-tests/jest.config.js",
     "integration-test:watch": "jest --config integration-tests/jest.config.js --watch",
     "lint": "eslint src/**/*.ts && tsc --noEmit",
-    "start": "COGNITO_LOCAL_DEVMODE=1 babel-node --extensions='.ts' src/bin/start.ts",
+    "start": "COGNITO_LOCAL_DEVMODE=1 babel-node --extensions='.ts' src/bin/start.ts start",
     "start:watch": "nodemon",
     "test": "jest",
     "test:watch": "jest --watch",

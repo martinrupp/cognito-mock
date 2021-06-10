@@ -1,7 +1,7 @@
+import * as http from 'http';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
-import * as http from 'http';
 import { CognitoError, unsupported, UnsupportedError } from '../errors';
 import log from '../log';
 import { Router } from '../targets/router';

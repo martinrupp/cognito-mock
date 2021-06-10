@@ -53,8 +53,6 @@ yargs
         .option('ClientName', { string: true })
         .check(({ userPoolId, clientName }) => true),
     handler: (argv) => {
-      console.log(argv);
-
       const { userPoolId: UserPoolId, clientName: ClientName = 'client' } = (argv as unknown) as {
         userPoolId: string;
         clientName: string | null;
@@ -77,6 +75,6 @@ yargs
         console.log(UserPoolClient);
       })();
     },
-  }).argv;
-
-yargs.help().alias('help', 'h');
+  })
+  .help()
+  .alias('help', 'h').argv;

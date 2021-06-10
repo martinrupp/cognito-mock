@@ -34,6 +34,7 @@ export interface UserPool {
   Id: string;
   UsernameAttributes?: UsernameAttribute[];
   MfaConfiguration?: 'OFF' | 'ON' | 'OPTIONAL';
+  AutoConfirmed?: boolean;
 }
 export interface UserPoolClient {
   readonly config: UserPool;

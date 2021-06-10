@@ -1,5 +1,5 @@
-import { CodeMismatchError, NotAuthorizedError } from "../errors";
-import { Services } from "../services";
+import { CodeMismatchError, NotAuthorizedError } from '../errors';
+import { Services } from '../services';
 
 interface Input {
   ClientId: string;
@@ -10,10 +10,7 @@ interface Input {
 
 export type ConfirmSignUpTarget = (body: Input) => Promise<void>;
 
-export const ConfirmSignUp = ({
-  cognitoClient,
-  triggers,
-}: Services): ConfirmSignUpTarget => async (body) => {
+export const ConfirmSignUp = ({ cognitoClient, triggers }: Services): ConfirmSignUpTarget => async (body) => {
   const userPool = await cognitoClient.getUserPoolForClientId(body.ClientId);
   const user = await userPool.getUserByUsername(body.Username);
   if (!user) {
@@ -26,14 +23,14 @@ export const ConfirmSignUp = ({
 
   await userPool.saveUser({
     ...user,
-    UserStatus: "CONFIRMED",
+    UserStatus: 'CONFIRMED',
     ConfirmationCode: undefined,
     UserLastModifiedDate: new Date().getTime(),
   });
 
-  if (triggers.enabled("PostConfirmation")) {
+  if (triggers.enabled('PostConfirmation')) {
     await triggers.postConfirmation({
-      source: "PostConfirmation_ConfirmSignUp",
+      source: 'PostConfirmation_ConfirmSignUp',
       username: user.Username,
       clientId: body.ClientId,
       userPoolId: userPool.config.Id,

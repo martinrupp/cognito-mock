@@ -1,40 +1,29 @@
-import log from "../log";
-import { AppClient, newId } from "./appClient";
-import { CreateDataStore, DataStore } from "./dataStore";
+import log from '../log';
+import { AppClient, newId } from './appClient';
+import { CreateDataStore, DataStore } from './dataStore';
 
 export interface UserAttribute {
-  Name: "sub" | "email" | "phone_number" | "preferred_username" | string;
+  Name: 'sub' | 'email' | 'phone_number' | 'preferred_username' | string;
   Value: string;
 }
 
 export interface MFAOption {
-  DeliveryMedium: "SMS";
-  AttributeName: "phone_number";
+  DeliveryMedium: 'SMS';
+  AttributeName: 'phone_number';
 }
 
 export const attributesIncludeMatch = (
   attributeName: string,
   attributeValue: string,
-  attributes: readonly UserAttribute[]
-) =>
-  !!attributes.find(
-    (x) => x.Name === attributeName && x.Value === attributeValue
-  );
-export const attributesInclude = (
-  attributeName: string,
-  attributes: readonly UserAttribute[]
-) => !!attributes.find((x) => x.Name === attributeName);
-export const attributeValue = (
-  attributeName: string,
-  attributes: readonly UserAttribute[]
-) => attributes.find((x) => x.Name === attributeName)?.Value;
-export const attributesToRecord = (
-  attributes: readonly UserAttribute[]
-): Record<string, string> =>
+  attributes: readonly UserAttribute[],
+) => !!attributes.find((x) => x.Name === attributeName && x.Value === attributeValue);
+export const attributesInclude = (attributeName: string, attributes: readonly UserAttribute[]) =>
+  !!attributes.find((x) => x.Name === attributeName);
+export const attributeValue = (attributeName: string, attributes: readonly UserAttribute[]) =>
+  attributes.find((x) => x.Name === attributeName)?.Value;
+export const attributesToRecord = (attributes: readonly UserAttribute[]): Record<string, string> =>
   attributes.reduce((acc, attr) => ({ ...acc, [attr.Name]: attr.Value }), {});
-export const attributesFromRecord = (
-  attributes: Record<string, string>
-): readonly UserAttribute[] =>
+export const attributesFromRecord = (attributes: Record<string, string>): readonly UserAttribute[] =>
   Object.entries(attributes).map(([Name, Value]) => ({ Name, Value }));
 
 export interface User {
@@ -42,7 +31,7 @@ export interface User {
   UserCreateDate: number;
   UserLastModifiedDate: number;
   Enabled: boolean;
-  UserStatus: "CONFIRMED" | "UNCONFIRMED" | "RESET_REQUIRED";
+  UserStatus: 'CONFIRMED' | 'UNCONFIRMED' | 'RESET_REQUIRED';
   Attributes: readonly UserAttribute[];
   MFAOptions?: readonly MFAOption[];
 
@@ -52,12 +41,13 @@ export interface User {
   MFACode?: string;
 }
 
-type UsernameAttribute = "email" | "phone_number";
+type UsernameAttribute = 'email' | 'phone_number';
 
 export interface UserPool {
   Id: string;
   UsernameAttributes?: UsernameAttribute[];
-  MfaConfiguration?: "OFF" | "ON" | "OPTIONAL";
+  MfaConfiguration?: 'OFF' | 'ON' | 'OPTIONAL';
+  AutoConfirmed?: boolean;
 }
 
 export interface UserPoolClient {
@@ -71,20 +61,19 @@ export interface UserPoolClient {
 export type CreateUserPoolClient = (
   defaultOptions: UserPool,
   clientsDataStore: DataStore,
-  createDataStore: CreateDataStore
+  createDataStore: CreateDataStore,
 ) => Promise<UserPoolClient>;
 
 export const createUserPoolClient = async (
   defaultOptions: UserPool,
   clientsDataStore: DataStore,
-  createDataStore: CreateDataStore
+  createDataStore: CreateDataStore,
 ): Promise<UserPoolClient> => {
   const dataStore = await createDataStore(defaultOptions.Id, {
     Users: {},
     Options: defaultOptions,
   });
-  const config = await dataStore.get<UserPool>("Options", defaultOptions);
-
+  const config = await dataStore.get<UserPool>('Options', defaultOptions);
   return {
     config,
     async createAppClient(name) {
@@ -99,34 +88,26 @@ export const createUserPoolClient = async (
         RefreshTokenValidity: 30,
       };
 
-      await clientsDataStore.set(["Clients", id], appClient);
+      await clientsDataStore.set(['Clients', id], appClient);
 
       return appClient;
     },
 
     async getUserByUsername(username) {
-      log.debug("getUserByUsername", username);
-      const aliasEmailEnabled = config.UsernameAttributes?.includes("email");
-      const aliasPhoneNumberEnabled = config.UsernameAttributes?.includes(
-        "phone_number"
-      );
+      log.debug('getUserByUsername', username);
+      const aliasEmailEnabled = config.UsernameAttributes?.includes('email');
+      const aliasPhoneNumberEnabled = config.UsernameAttributes?.includes('phone_number');
 
-      const users = await dataStore.get<Record<string, User>>("Users", {});
+      const users = await dataStore.get<Record<string, User>>('Users', {});
       for (const user of Object.values(users)) {
-        if (attributesIncludeMatch("sub", username, user.Attributes)) {
+        if (attributesIncludeMatch('sub', username, user.Attributes)) {
           return user;
         }
-        if (
-          aliasEmailEnabled &&
-          attributesIncludeMatch("email", username, user.Attributes)
-        ) {
+        if (aliasEmailEnabled && attributesIncludeMatch('email', username, user.Attributes)) {
           return user;
         }
 
-        if (
-          aliasPhoneNumberEnabled &&
-          attributesIncludeMatch("phone_number", username, user.Attributes)
-        ) {
+        if (aliasPhoneNumberEnabled && attributesIncludeMatch('phone_number', username, user.Attributes)) {
           return user;
         }
       }
@@ -135,18 +116,18 @@ export const createUserPoolClient = async (
     },
 
     async listUsers(): Promise<readonly User[]> {
-      log.debug("listUsers");
-      const users = await dataStore.get<Record<string, User>>("Users", {});
+      log.debug('listUsers');
+      const users = await dataStore.get<Record<string, User>>('Users', {});
 
       return Object.values(users);
     },
 
     async saveUser(user) {
-      log.debug("saveUser", user);
+      log.debug('saveUser', user);
 
-      const attributes = attributesInclude("sub", user.Attributes)
+      const attributes = attributesInclude('sub', user.Attributes)
         ? user.Attributes
-        : [{ Name: "sub", Value: user.Username }, ...user.Attributes];
+        : [{ Name: 'sub', Value: user.Username }, ...user.Attributes];
 
       await dataStore.set<User>(`Users.${user.Username}`, {
         ...user,
