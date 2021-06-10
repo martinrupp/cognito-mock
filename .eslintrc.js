@@ -2,11 +2,11 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   plugins: ['jsx-conditionals', '@typescript-eslint', 'jsx-a11y', 'prettier'],
   extends: [
-    'airbnb',
     'prettier',
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:jsx-a11y/recommended',
+    'import',
   ],
   globals: {
     i18next: true,

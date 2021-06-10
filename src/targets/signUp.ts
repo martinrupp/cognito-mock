@@ -1,8 +1,8 @@
-import * as uuid from "uuid";
-import { UsernameExistsError } from "../errors";
-import { Services } from "../services";
-import { DeliveryDetails } from "../services/codeDelivery/codeDelivery";
-import { User } from "../services/userPoolClient";
+import * as uuid from 'uuid';
+import { UsernameExistsError } from '../errors';
+import { Services } from '../services';
+import { DeliveryDetails } from '../services/codeDelivery/codeDelivery';
+import { User } from '../services/userPoolClient';
 
 interface Input {
   ClientId: string;
@@ -23,10 +23,7 @@ interface Output {
 
 export type SignUpTarget = (body: Input) => Promise<Output>;
 
-export const SignUp = ({
-  cognitoClient,
-  codeDelivery,
-}: Services): SignUpTarget => async (body) => {
+export const SignUp = ({ cognitoClient, codeDelivery }: Services): SignUpTarget => async (body) => {
   // TODO: This should behave differently depending on if PreventUserExistenceErrors
   // is enabled on the user pool. This will be the default after Feb 2020.
   // See: https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pool-managing-errors.html
@@ -42,16 +39,14 @@ export const SignUp = ({
     Password: body.Password,
     UserCreateDate: new Date().getTime(),
     UserLastModifiedDate: new Date().getTime(),
-    UserStatus: "UNCONFIRMED",
+    UserStatus: 'UNCONFIRMED',
     Username: uuid.v4(),
   };
 
   const deliveryDetails: DeliveryDetails = {
-    AttributeName: "email",
-    DeliveryMedium: "EMAIL",
-    Destination: user.Attributes.filter((x) => x.Name === "email").map(
-      (x) => x.Value
-    )[0],
+    AttributeName: 'email',
+    DeliveryMedium: 'EMAIL',
+    Destination: user.Attributes.filter((x) => x.Name === 'email').map((x) => x.Value)[0],
   };
 
   const code = await codeDelivery(user, deliveryDetails);
@@ -62,7 +57,7 @@ export const SignUp = ({
   });
 
   return {
-    UserConfirmed: user.UserStatus === "CONFIRMED",
+    UserConfirmed: user.UserStatus === 'CONFIRMED',
     UserSub: user.Username,
     CodeDeliveryDetails: deliveryDetails,
   };
