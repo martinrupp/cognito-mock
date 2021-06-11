@@ -20,7 +20,6 @@ export interface Server {
 
 export const createServer = (router: Router, options: Partial<ServerOptions> = {}): Server => {
   const app = express();
-
   app.use(
     cors({
       origin: '*',
