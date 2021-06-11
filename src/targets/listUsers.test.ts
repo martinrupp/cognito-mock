@@ -1,9 +1,9 @@
-import { advanceTo } from "jest-date-mock";
-import { CognitoClient, UserPoolClient } from "../services";
-import { Triggers } from "../services/triggers";
-import { ListUsers, ListUsersTarget } from "./listUsers";
+import { advanceTo } from 'jest-date-mock';
+import { CognitoClient, UserPoolClient } from '../services';
+import { Triggers } from '../services/triggers';
+import { ListUsers, ListUsersTarget } from './listUsers';
 
-describe("ListUsers target", () => {
+describe('ListUsers target', () => {
   let listUsers: ListUsersTarget;
   let mockCognitoClient: jest.Mocked<CognitoClient>;
   let mockUserPoolClient: jest.Mocked<UserPoolClient>;
@@ -17,12 +17,13 @@ describe("ListUsers target", () => {
 
     mockUserPoolClient = {
       config: {
-        Id: "test",
+        Id: 'test',
       },
       createAppClient: jest.fn(),
       getUserByUsername: jest.fn(),
       listUsers: jest.fn(),
       saveUser: jest.fn(),
+      deleteUser: jest.fn(),
     };
     mockCognitoClient = {
       getUserPool: jest.fn().mockResolvedValue(mockUserPoolClient),
@@ -42,23 +43,23 @@ describe("ListUsers target", () => {
     });
   });
 
-  it("lists users and removes Cognito Local fields", async () => {
+  it('lists users and removes Cognito Local fields', async () => {
     mockUserPoolClient.listUsers.mockResolvedValue([
       {
         Attributes: [],
-        UserStatus: "CONFIRMED",
-        Password: "hunter2",
-        Username: "0000-0000",
+        UserStatus: 'CONFIRMED',
+        Password: 'hunter2',
+        Username: '0000-0000',
         Enabled: true,
         UserCreateDate: new Date().getTime(),
         UserLastModifiedDate: new Date().getTime(),
-        ConfirmationCode: "1234",
+        ConfirmationCode: '1234',
       },
       {
         Attributes: [],
-        UserStatus: "CONFIRMED",
-        Password: "password1",
-        Username: "1111-1111",
+        UserStatus: 'CONFIRMED',
+        Password: 'password1',
+        Username: '1111-1111',
         Enabled: true,
         UserCreateDate: new Date().getTime(),
         UserLastModifiedDate: new Date().getTime(),
@@ -66,23 +67,23 @@ describe("ListUsers target", () => {
     ]);
 
     const output = await listUsers({
-      UserPoolId: "userPoolId",
+      UserPoolId: 'userPoolId',
     });
 
     expect(output).toBeDefined();
     expect(output.Users).toEqual([
       {
         Attributes: [],
-        UserStatus: "CONFIRMED",
-        Username: "0000-0000",
+        UserStatus: 'CONFIRMED',
+        Username: '0000-0000',
         Enabled: true,
         UserCreateDate: new Date().getTime(),
         UserLastModifiedDate: new Date().getTime(),
       },
       {
         Attributes: [],
-        UserStatus: "CONFIRMED",
-        Username: "1111-1111",
+        UserStatus: 'CONFIRMED',
+        Username: '1111-1111',
         Enabled: true,
         UserCreateDate: new Date().getTime(),
         UserLastModifiedDate: new Date().getTime(),
@@ -90,8 +91,8 @@ describe("ListUsers target", () => {
     ]);
   });
 
-  it.todo("supports AttributesToGet to specify which attributes to return");
-  it.todo("supports Filter to filter users before returning");
-  it.todo("supports Limit to specify the number of users to return");
-  it.todo("supports PaginationToken to paginate results");
+  it.todo('supports AttributesToGet to specify which attributes to return');
+  it.todo('supports Filter to filter users before returning');
+  it.todo('supports Limit to specify the number of users to return');
+  it.todo('supports PaginationToken to paginate results');
 });

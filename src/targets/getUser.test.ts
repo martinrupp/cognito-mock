@@ -27,6 +27,7 @@ describe('GetUser target', () => {
       getUserByUsername: jest.fn(),
       listUsers: jest.fn(),
       saveUser: jest.fn(),
+      deleteUser: jest.fn(),
     };
     mockCognitoClient = {
       getUserPool: jest.fn().mockResolvedValue(mockUserPoolClient),
@@ -73,7 +74,7 @@ describe('GetUser target', () => {
         PrivateKey.pem,
         {
           algorithm: 'RS256',
-          issuer: `http://localhost:9229/test`,
+          issuer: `https://cognito-idp.fakelocalhost-9229/test`,
           expiresIn: '24h',
           keyid: 'CognitoMock',
         },
@@ -113,7 +114,7 @@ describe('GetUser target', () => {
         PrivateKey.pem,
         {
           algorithm: 'RS256',
-          issuer: `http://localhost:9229/test`,
+          issuer: `https://cognito-idp.fakelocalhost-9229/test`,
           expiresIn: '24h',
           keyid: 'CognitoMock',
         },

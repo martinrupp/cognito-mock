@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { InvalidParameterError } from '../errors';
+import { InvalidParameterError, NotAuthorizedError } from '../errors';
 import log from '../log';
 import { Services } from '../services';
 import { Token } from '../services/tokens';
@@ -9,15 +9,9 @@ interface Input {
   AccessToken: string;
 }
 
-interface Output {
-  Username: string;
-  UserAttributes: readonly UserAttribute[];
-  MFAOptions?: readonly MFAOption[];
-}
+export type GetUserTarget = (body: Input) => Promise<null>;
 
-export type GetUserTarget = (body: Input) => Promise<Output | null>;
-
-export const GetUser = ({ cognitoClient }: Services): GetUserTarget => async (body) => {
+export const DeleteUser = ({ cognitoClient }: Services): GetUserTarget => async (body) => {
   const decodedToken = jwt.decode(body.AccessToken) as Token | null;
   if (!decodedToken) {
     log.info('Unable to decode token');
@@ -32,17 +26,10 @@ export const GetUser = ({ cognitoClient }: Services): GetUserTarget => async (bo
   const userPool = await cognitoClient.getUserPoolForClientId(client_id);
   const user = await userPool.getUserByUsername(sub);
   if (!user) {
-    return null;
+    throw new NotAuthorizedError();
   }
 
-  const output: Output = {
-    Username: user.Username,
-    UserAttributes: user.Attributes,
-  };
+  userPool.deleteUser(user);
 
-  if (user.MFAOptions) {
-    output.MFAOptions = user.MFAOptions;
-  }
-
-  return output;
+  return null;
 };

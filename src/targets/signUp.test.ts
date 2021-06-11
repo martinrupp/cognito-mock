@@ -1,12 +1,12 @@
-import { advanceTo } from "jest-date-mock";
-import { UsernameExistsError } from "../errors";
-import { CognitoClient, UserPoolClient } from "../services";
-import { Triggers } from "../services/triggers";
-import { SignUp, SignUpTarget } from "./signUp";
+import { advanceTo } from 'jest-date-mock';
+import { UsernameExistsError } from '../errors';
+import { CognitoClient, UserPoolClient } from '../services';
+import { Triggers } from '../services/triggers';
+import { SignUp, SignUpTarget } from './signUp';
 
 const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
 
-describe("SignUp target", () => {
+describe('SignUp target', () => {
   let signUp: SignUpTarget;
   let mockCognitoClient: jest.Mocked<CognitoClient>;
   let mockUserPoolClient: jest.Mocked<UserPoolClient>;
@@ -20,12 +20,13 @@ describe("SignUp target", () => {
 
     mockUserPoolClient = {
       config: {
-        Id: "test",
+        Id: 'test',
       },
       createAppClient: jest.fn(),
       getUserByUsername: jest.fn(),
       listUsers: jest.fn(),
       saveUser: jest.fn(),
+      deleteUser: jest.fn(),
     };
     mockCognitoClient = {
       getUserPool: jest.fn().mockResolvedValue(mockUserPoolClient),
@@ -45,96 +46,96 @@ describe("SignUp target", () => {
     });
   });
 
-  it("throws if user already exists", async () => {
+  it('throws if user already exists', async () => {
     mockUserPoolClient.getUserByUsername.mockResolvedValue({
       Attributes: [],
       Enabled: true,
-      Password: "hunter2",
+      Password: 'hunter2',
       UserCreateDate: now.getTime(),
       UserLastModifiedDate: now.getTime(),
-      UserStatus: "CONFIRMED",
-      Username: "0000-0000",
+      UserStatus: 'CONFIRMED',
+      Username: '0000-0000',
     });
 
     await expect(
       signUp({
-        ClientId: "clientId",
-        Password: "pwd",
-        Username: "0000-0000",
+        ClientId: 'clientId',
+        Password: 'pwd',
+        Username: '0000-0000',
         UserAttributes: [],
-      })
+      }),
     ).rejects.toBeInstanceOf(UsernameExistsError);
   });
 
-  it("saves a new user", async () => {
+  it('saves a new user', async () => {
     mockUserPoolClient.getUserByUsername.mockResolvedValue(null);
 
     await signUp({
-      ClientId: "clientId",
-      Password: "pwd",
-      Username: "0000-0000",
+      ClientId: 'clientId',
+      Password: 'pwd',
+      Username: '0000-0000',
       UserAttributes: [],
     });
 
     expect(mockUserPoolClient.saveUser).toHaveBeenCalledWith({
       Attributes: [],
       Enabled: true,
-      Password: "pwd",
+      Password: 'pwd',
       UserCreateDate: now.getTime(),
       UserLastModifiedDate: now.getTime(),
-      UserStatus: "UNCONFIRMED",
+      UserStatus: 'UNCONFIRMED',
       Username: expect.stringMatching(UUID),
     });
   });
 
   it("sends a confirmation code to the user's email address", async () => {
     mockUserPoolClient.getUserByUsername.mockResolvedValue(null);
-    mockCodeDelivery.mockResolvedValue("1234");
+    mockCodeDelivery.mockResolvedValue('1234');
 
     await signUp({
-      ClientId: "clientId",
-      Password: "pwd",
-      Username: "0000-0000",
-      UserAttributes: [{ Name: "email", Value: "example@example.com" }],
+      ClientId: 'clientId',
+      Password: 'pwd',
+      Username: '0000-0000',
+      UserAttributes: [{ Name: 'email', Value: 'example@example.com' }],
     });
 
     expect(mockCodeDelivery).toHaveBeenCalledWith(
       {
-        Attributes: [{ Name: "email", Value: "example@example.com" }],
+        Attributes: [{ Name: 'email', Value: 'example@example.com' }],
         Enabled: true,
-        Password: "pwd",
+        Password: 'pwd',
         UserCreateDate: now.getTime(),
         UserLastModifiedDate: now.getTime(),
-        UserStatus: "UNCONFIRMED",
+        UserStatus: 'UNCONFIRMED',
         Username: expect.stringMatching(UUID),
       },
       {
-        AttributeName: "email",
-        DeliveryMedium: "EMAIL",
-        Destination: "example@example.com",
-      }
+        AttributeName: 'email',
+        DeliveryMedium: 'EMAIL',
+        Destination: 'example@example.com',
+      },
     );
   });
 
-  it("saves the confirmation code on the user for comparison when confirming", async () => {
+  it('saves the confirmation code on the user for comparison when confirming', async () => {
     mockUserPoolClient.getUserByUsername.mockResolvedValue(null);
-    mockCodeDelivery.mockResolvedValue("1234");
+    mockCodeDelivery.mockResolvedValue('1234');
 
     await signUp({
-      ClientId: "clientId",
-      Password: "pwd",
-      Username: "0000-0000",
-      UserAttributes: [{ Name: "email", Value: "example@example.com" }],
+      ClientId: 'clientId',
+      Password: 'pwd',
+      Username: '0000-0000',
+      UserAttributes: [{ Name: 'email', Value: 'example@example.com' }],
     });
 
     expect(mockUserPoolClient.saveUser).toHaveBeenCalledWith({
-      Attributes: [{ Name: "email", Value: "example@example.com" }],
-      ConfirmationCode: "1234",
+      Attributes: [{ Name: 'email', Value: 'example@example.com' }],
+      ConfirmationCode: '1234',
       Enabled: true,
-      Password: "pwd",
+      Password: 'pwd',
       UserCreateDate: now.getTime(),
       UserLastModifiedDate: now.getTime(),
-      UserStatus: "UNCONFIRMED",
+      UserStatus: 'UNCONFIRMED',
       Username: expect.stringMatching(UUID),
     });
   });

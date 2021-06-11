@@ -1,9 +1,9 @@
-import { CodeMismatchError, NotAuthorizedError } from "../errors";
-import { Services } from "../services";
-import { generateTokens } from "../services/tokens";
+import { CodeMismatchError, NotAuthorizedError } from '../errors';
+import { Services } from '../services';
+import { generateTokens } from '../services/tokens';
 
 interface Input {
-  ChallengeName: "SMS_MFA";
+  ChallengeName: 'SMS_MFA';
   ChallengeResponses: {
     USERNAME: string;
     SMS_MFA_CODE: string;
@@ -25,13 +25,9 @@ interface Output {
 
 export type RespondToAuthChallengeTarget = (body: Input) => Promise<Output>;
 
-export const RespondToAuthChallenge = ({
-  cognitoClient,
-}: Services): RespondToAuthChallengeTarget => async (body) => {
+export const RespondToAuthChallenge = ({ cognitoClient }: Services): RespondToAuthChallengeTarget => async (body) => {
   const userPool = await cognitoClient.getUserPoolForClientId(body.ClientId);
-  const user = await userPool.getUserByUsername(
-    body.ChallengeResponses.USERNAME
-  );
+  const user = await userPool.getUserByUsername(body.ChallengeResponses.USERNAME);
   if (!user) {
     throw new NotAuthorizedError();
   }
@@ -48,11 +44,7 @@ export const RespondToAuthChallenge = ({
   return {
     ChallengeName: body.ChallengeName,
     ChallengeParameters: {},
-    AuthenticationResult: generateTokens(
-      user,
-      body.ClientId,
-      userPool.config.Id
-    ),
+    AuthenticationResult: generateTokens(user, body.ClientId, userPool.config.Id),
     Session: body.Session,
   };
 };

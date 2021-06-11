@@ -28,6 +28,7 @@ describe('RespondToAuthChallenge target', () => {
       getUserByUsername: jest.fn(),
       listUsers: jest.fn(),
       saveUser: jest.fn(),
+      deleteUser: jest.fn(),
     };
     mockCognitoClient = {
       getUserPool: jest.fn().mockResolvedValue(mockUserPoolClient),
@@ -97,7 +98,7 @@ describe('RespondToAuthChallenge target', () => {
       const decodedAccessToken = jwt.decode(output.AuthenticationResult.AccessToken);
       expect(decodedAccessToken).toMatchObject({
         client_id: 'clientId',
-        iss: 'http://localhost:9229/test',
+        iss: 'https://cognito-idp.fakelocalhost-9229/test',
         sub: '0000-0000',
         token_use: 'access',
         username: '0000-0000',
@@ -117,7 +118,7 @@ describe('RespondToAuthChallenge target', () => {
       const decodedIdToken = jwt.decode(output.AuthenticationResult.IdToken);
       expect(decodedIdToken).toMatchObject({
         aud: 'clientId',
-        iss: 'http://localhost:9229/test',
+        iss: 'https://cognito-idp.fakelocalhost-9229/test',
         sub: '0000-0000',
         token_use: 'id',
         'cognito:username': '0000-0000',

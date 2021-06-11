@@ -54,7 +54,7 @@ export function generateTokens(user: User, clientId: string, userPoolId: string)
       {
         algorithm: 'RS256',
         // TODO: this needs to match the actual host/port we started the server on
-        issuer: `http://localhost:9229/${userPoolId}`,
+        issuer: `https://cognito-idp.fakelocalhost-9229/${userPoolId}`,
         expiresIn: '24h',
         audience: clientId,
         keyid: 'CognitoMock',

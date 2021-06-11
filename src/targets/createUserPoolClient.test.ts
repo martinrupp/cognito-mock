@@ -1,13 +1,10 @@
-import { advanceTo } from "jest-date-mock";
-import { CognitoClient, UserPoolClient } from "../services";
-import { AppClient } from "../services/appClient";
-import { Triggers } from "../services/triggers";
-import {
-  CreateUserPoolClient,
-  CreateUserPoolClientTarget,
-} from "./createUserPoolClient";
+import { advanceTo } from 'jest-date-mock';
+import { CognitoClient, UserPoolClient } from '../services';
+import { AppClient } from '../services/appClient';
+import { Triggers } from '../services/triggers';
+import { CreateUserPoolClient, CreateUserPoolClientTarget } from './createUserPoolClient';
 
-describe("CreateUserPoolClient target", () => {
+describe('CreateUserPoolClient target', () => {
   let createUserPoolClient: CreateUserPoolClientTarget;
   let mockCognitoClient: jest.Mocked<CognitoClient>;
   let mockUserPoolClient: jest.Mocked<UserPoolClient>;
@@ -21,12 +18,13 @@ describe("CreateUserPoolClient target", () => {
 
     mockUserPoolClient = {
       config: {
-        Id: "test",
+        Id: 'test',
       },
       createAppClient: jest.fn(),
       getUserByUsername: jest.fn(),
       listUsers: jest.fn(),
       saveUser: jest.fn(),
+      deleteUser: jest.fn(),
     };
     mockCognitoClient = {
       getUserPool: jest.fn().mockResolvedValue(mockUserPoolClient),
@@ -46,26 +44,24 @@ describe("CreateUserPoolClient target", () => {
     });
   });
 
-  it("creates a new app client", async () => {
+  it('creates a new app client', async () => {
     const createdAppClient: AppClient = {
       RefreshTokenValidity: 30,
       AllowedOAuthFlowsUserPoolClient: false,
       LastModifiedDate: new Date().getTime(),
       CreationDate: new Date().getTime(),
-      UserPoolId: "userPoolId",
-      ClientId: "abc",
-      ClientName: "clientName",
+      UserPoolId: 'userPoolId',
+      ClientId: 'abc',
+      ClientName: 'clientName',
     };
     mockUserPoolClient.createAppClient.mockResolvedValue(createdAppClient);
 
     const result = await createUserPoolClient({
-      ClientName: "clientName",
-      UserPoolId: "userPoolId",
+      ClientName: 'clientName',
+      UserPoolId: 'userPoolId',
     });
 
-    expect(mockUserPoolClient.createAppClient).toHaveBeenCalledWith(
-      "clientName"
-    );
+    expect(mockUserPoolClient.createAppClient).toHaveBeenCalledWith('clientName');
 
     expect(result).toEqual({ UserPoolClient: createdAppClient });
   });

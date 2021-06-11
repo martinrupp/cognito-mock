@@ -56,6 +56,7 @@ export interface UserPoolClient {
   getUserByUsername(username: string): Promise<User | null>;
   listUsers(): Promise<readonly User[]>;
   saveUser(user: User): Promise<void>;
+  deleteUser(user: User): Promise<void>;
 }
 
 export type CreateUserPoolClient = (
@@ -133,6 +134,9 @@ export const createUserPoolClient = async (
         ...user,
         Attributes: attributes,
       });
+    },
+    async deleteUser(user) {
+      await dataStore.delete(['Users', user.Username]);
     },
   };
 };

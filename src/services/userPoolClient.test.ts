@@ -25,11 +25,13 @@ describe('User Pool Client', () => {
       set: jest.fn(),
       get: jest.fn(),
       getRoot: jest.fn(),
+      delete: jest.fn(),
     };
     mockDataStore = {
       set: jest.fn(),
       get: jest.fn(),
       getRoot: jest.fn(),
+      delete: jest.fn(),
     };
     createDataStore = jest.fn().mockResolvedValue(mockDataStore);
   });

@@ -1,10 +1,10 @@
-import { advanceTo } from "jest-date-mock";
-import { UserNotFoundError } from "../errors";
-import { CognitoClient, UserPoolClient } from "../services";
-import { Triggers } from "../services/triggers";
-import { ForgotPassword, ForgotPasswordTarget } from "./forgotPassword";
+import { advanceTo } from 'jest-date-mock';
+import { UserNotFoundError } from '../errors';
+import { CognitoClient, UserPoolClient } from '../services';
+import { Triggers } from '../services/triggers';
+import { ForgotPassword, ForgotPasswordTarget } from './forgotPassword';
 
-describe("ForgotPassword target", () => {
+describe('ForgotPassword target', () => {
   let forgotPassword: ForgotPasswordTarget;
   let mockCognitoClient: jest.Mocked<CognitoClient>;
   let mockUserPoolClient: jest.Mocked<UserPoolClient>;
@@ -18,12 +18,13 @@ describe("ForgotPassword target", () => {
 
     mockUserPoolClient = {
       config: {
-        Id: "test",
+        Id: 'test',
       },
       createAppClient: jest.fn(),
       getUserByUsername: jest.fn(),
       listUsers: jest.fn(),
       saveUser: jest.fn(),
+      deleteUser: jest.fn(),
     };
     mockCognitoClient = {
       getUserPool: jest.fn().mockResolvedValue(mockUserPoolClient),
@@ -48,82 +49,82 @@ describe("ForgotPassword target", () => {
 
     await expect(
       forgotPassword({
-        ClientId: "clientId",
-        Username: "0000-0000",
-      })
+        ClientId: 'clientId',
+        Username: '0000-0000',
+      }),
     ).rejects.toBeInstanceOf(UserNotFoundError);
   });
 
   it("sends a confirmation code to the user's email address", async () => {
     mockUserPoolClient.getUserByUsername.mockResolvedValue({
-      Attributes: [{ Name: "email", Value: "example@example.com" }],
+      Attributes: [{ Name: 'email', Value: 'example@example.com' }],
       Enabled: true,
-      Password: "hunter2",
+      Password: 'hunter2',
       UserCreateDate: now.getTime(),
       UserLastModifiedDate: now.getTime(),
-      UserStatus: "CONFIRMED",
-      Username: "0000-0000",
+      UserStatus: 'CONFIRMED',
+      Username: '0000-0000',
     });
-    mockCodeDelivery.mockResolvedValue("1234");
+    mockCodeDelivery.mockResolvedValue('1234');
 
     const result = await forgotPassword({
-      ClientId: "clientId",
-      Username: "0000-0000",
+      ClientId: 'clientId',
+      Username: '0000-0000',
     });
 
     expect(mockCodeDelivery).toHaveBeenCalledWith(
       {
-        Attributes: [{ Name: "email", Value: "example@example.com" }],
+        Attributes: [{ Name: 'email', Value: 'example@example.com' }],
         Enabled: true,
-        Password: "hunter2",
+        Password: 'hunter2',
         UserCreateDate: now.getTime(),
         UserLastModifiedDate: now.getTime(),
-        UserStatus: "CONFIRMED",
-        Username: "0000-0000",
+        UserStatus: 'CONFIRMED',
+        Username: '0000-0000',
       },
       {
-        AttributeName: "email",
-        DeliveryMedium: "EMAIL",
-        Destination: "example@example.com",
-      }
+        AttributeName: 'email',
+        DeliveryMedium: 'EMAIL',
+        Destination: 'example@example.com',
+      },
     );
 
     expect(result).toEqual({
       CodeDeliveryDetails: {
-        AttributeName: "email",
-        DeliveryMedium: "EMAIL",
-        Destination: "example@example.com",
+        AttributeName: 'email',
+        DeliveryMedium: 'EMAIL',
+        Destination: 'example@example.com',
       },
     });
   });
 
-  it("saves the confirmation code on the user for comparison when confirming", async () => {
+  it('saves the confirmation code on the user for comparison when confirming', async () => {
     mockUserPoolClient.getUserByUsername.mockResolvedValue({
-      Attributes: [{ Name: "email", Value: "example@example.com" }],
+      Attributes: [{ Name: 'email', Value: 'example@example.com' }],
       Enabled: true,
-      Password: "hunter2",
+      Password: 'hunter2',
       UserCreateDate: now.getTime(),
       UserLastModifiedDate: now.getTime(),
-      UserStatus: "CONFIRMED",
-      Username: "0000-0000",
+      UserStatus: 'CONFIRMED',
+      Username: '0000-0000',
     });
-    mockCodeDelivery.mockResolvedValue("1234");
+    mockCodeDelivery.mockResolvedValue('1234');
 
     await forgotPassword({
-      ClientId: "clientId",
-      Username: "0000-0000",
+      ClientId: 'clientId',
+      Username: '0000-0000',
     });
 
     expect(mockUserPoolClient.saveUser).toHaveBeenCalledWith({
-      Attributes: [{ Name: "email", Value: "example@example.com" }],
-      ConfirmationCode: "1234",
+      Attributes: [{ Name: 'email', Value: 'example@example.com' }],
+      ConfirmationCode: '1234',
       Enabled: true,
-      Password: "hunter2",
+      Password: 'hunter2',
       UserCreateDate: now.getTime(),
       UserLastModifiedDate: now.getTime(),
       // TODO: validate whether an already confirmed user should stay confirmed when password reset starts?
-      UserStatus: "CONFIRMED",
-      Username: "0000-0000",
+      UserStatus: 'CONFIRMED',
+      Username: '0000-0000',
     });
   });
 });
