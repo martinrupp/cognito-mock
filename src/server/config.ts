@@ -21,7 +21,7 @@ const defaults: Config = {
   UserPoolDefaults: {
     Id: 'local',
     UsernameAttributes: ['email'],
-    AutoConfirmed: false,
+    AutoConfirmed: true,
   },
 };
 
