@@ -63,6 +63,7 @@ export const SignUp = ({ cognitoClient, codeDelivery }: Services): SignUpTarget 
       CodeDeliveryDetails: deliveryDetails,
     };
   } else {
+    await userPool.saveUser(user);
     return {
       UserConfirmed: user.UserStatus === 'CONFIRMED',
       UserSub: user.Username,

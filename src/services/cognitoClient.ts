@@ -8,12 +8,24 @@ export interface CognitoClient {
   getUserPoolForClientId(clientId: string): Promise<UserPoolClient>;
 }
 
+const globalDefaultClient = {
+  global_default_client_id: {
+    ClientId: 'global_default_client_id',
+    ClientName: 'client',
+    UserPoolId: 'global_default',
+    CreationDate: 0,
+    LastModifiedDate: 0,
+    AllowedOAuthFlowsUserPoolClient: false,
+    RefreshTokenValidity: 30,
+  },
+};
+
 export const createCognitoClient = async (
   userPoolDefaultOptions: UserPool,
   createDataStore: CreateDataStore,
   createUserPoolClient: CreateUserPoolClient,
 ): Promise<CognitoClient> => {
-  const clients = await createDataStore('clients', { Clients: {} });
+  const clients = await createDataStore('clients', { Clients: process.env.isRoot ? globalDefaultClient : {} });
 
   return {
     async getUserPool(userPoolId) {

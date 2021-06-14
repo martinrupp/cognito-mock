@@ -28,6 +28,9 @@ export const createDataStore: CreateDataStore = async (
 
   db.default(defaults);
 
+  if (process.env.isRoot && id === 'clients') {
+    db.save();
+  }
   return {
     async getRoot() {
       return (await db.value()) ?? null;
