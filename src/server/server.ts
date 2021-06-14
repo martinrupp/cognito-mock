@@ -11,6 +11,7 @@ export interface ServerOptions {
   port: number;
   hostname: string;
   development: boolean;
+  storagePath?: string;
 }
 
 export interface Server {

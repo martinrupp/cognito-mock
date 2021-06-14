@@ -14,7 +14,7 @@ interface Input {
 interface Output {
   UserConfirmed: boolean;
   UserSub: string;
-  CodeDeliveryDetails: {
+  CodeDeliveryDetails?: {
     AttributeName?: string;
     DeliveryMedium?: string;
     Destination?: string;
@@ -44,22 +44,28 @@ export const SignUp = ({ cognitoClient, codeDelivery }: Services): SignUpTarget 
     Username: uuid.v4(),
   };
 
-  const deliveryDetails: DeliveryDetails = {
-    AttributeName: 'email',
-    DeliveryMedium: 'EMAIL',
-    Destination: user.Attributes.filter((x) => x.Name === 'email').map((x) => x.Value)[0],
-  };
+  if (!userPool.config.AutoConfirmed) {
+    const deliveryDetails: DeliveryDetails = {
+      AttributeName: 'email',
+      DeliveryMedium: 'EMAIL',
+      Destination: user.Attributes.filter((x) => x.Name === 'email').map((x) => x.Value)[0],
+    };
 
-  const code = await codeDelivery(user, deliveryDetails);
+    const code = await codeDelivery(user, deliveryDetails);
 
-  await userPool.saveUser({
-    ...user,
-    ConfirmationCode: code,
-  });
-
-  return {
-    UserConfirmed: user.UserStatus === 'CONFIRMED',
-    UserSub: user.Username,
-    CodeDeliveryDetails: deliveryDetails,
-  };
+    await userPool.saveUser({
+      ...user,
+      ConfirmationCode: code,
+    });
+    return {
+      UserConfirmed: user.UserStatus === 'CONFIRMED',
+      UserSub: user.Username,
+      CodeDeliveryDetails: deliveryDetails,
+    };
+  } else {
+    return {
+      UserConfirmed: user.UserStatus === 'CONFIRMED',
+      UserSub: user.Username,
+    };
+  }
 };

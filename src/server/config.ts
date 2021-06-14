@@ -26,9 +26,11 @@ const defaults: Config = {
 };
 
 export const loadConfig = async (): Promise<Config> => {
-  const dataStore = await createDataStore('config', defaults, '.cognito');
-
+  const dataStore = await createDataStore(
+    'config',
+    defaults,
+    process.env.isRoot ? `${process.env.HOME}/.cognito` : '.cognito',
+  );
   const config = await dataStore.getRoot<Config>();
-
   return deepmerge(defaults, config ?? {});
 };

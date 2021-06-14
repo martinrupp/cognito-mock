@@ -1,7 +1,7 @@
 {
   "name": "cognito-mock",
   "description": "Fork from cognito-local",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "license": "MIT",
   "bin": "lib/bin/start.js",
   "main": "lib/index.js",

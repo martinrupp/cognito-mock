@@ -18,7 +18,11 @@ yargs
   .command({
     command: 'start',
     describe: 'start cognito server',
-    handler: () => {
+    builder: (yargs_) => yargs_.option('isRoot', {}),
+    handler: (argv) => {
+      if (argv.isRoot) {
+        process.env.isRoot = 'true';
+      }
       createDefaultServer()
         .then((server) => {
           const hostname = process.env.HOST ?? 'localhost';
