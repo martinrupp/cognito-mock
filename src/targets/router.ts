@@ -10,6 +10,8 @@ import { RespondToAuthChallenge } from './respondToAuthChallenge';
 import { SignUp } from './signUp';
 import { GetUser } from './getUser';
 import { DeleteUser } from './deleteUser';
+import { AdminCreateUser } from './adminCreateUser';
+
 export const Targets = {
   ConfirmForgotPassword,
   ConfirmSignUp,
@@ -21,6 +23,7 @@ export const Targets = {
   SignUp,
   GetUser,
   DeleteUser,
+  AdminCreateUser,
 };
 
 type TargetName = keyof typeof Targets;
