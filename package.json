@@ -20,6 +20,7 @@
     "integration-test:watch": "jest --config integration-tests/jest.config.js --watch",
     "lint": "eslint src/**/*.ts && tsc --noEmit",
     "start": "COGNITO_LOCAL_DEVMODE=1 babel-node --extensions='.ts' src/bin/start.ts start",
+    "start:debug": "COGNITO_LOCAL_DEVMODE=1 babel-node --extensions='.ts' --inspect=6123 src/bin/start.ts start",
     "start:watch": "nodemon",
     "test": "jest",
     "test:watch": "jest --watch",
