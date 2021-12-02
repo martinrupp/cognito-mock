@@ -20,6 +20,8 @@ const globalDefaultClient = {
   },
 };
 
+const userPoolStore = {};
+
 export const createCognitoClient = async (
   userPoolDefaultOptions: UserPool,
   createDataStore: CreateDataStore,
@@ -29,7 +31,12 @@ export const createCognitoClient = async (
 
   return {
     async getUserPool(userPoolId) {
-      return createUserPoolClient({ ...userPoolDefaultOptions, Id: userPoolId }, clients, createDataStore);
+      if (userPoolId in userPoolStore) {
+        return userPoolStore[userPoolId];
+      }
+      const pool = createUserPoolClient({ ...userPoolDefaultOptions, Id: userPoolId }, clients, createDataStore);
+      userPoolStore[userPoolId] = pool;
+      return pool;
     },
 
     async getUserPoolForClientId(clientId) {
