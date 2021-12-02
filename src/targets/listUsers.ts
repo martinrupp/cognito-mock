@@ -1,5 +1,5 @@
 import { Services } from '../services';
-import { UserAttribute } from '../services/userPoolClient';
+import { attributeValue, UserAttribute } from '../services/userPoolClient';
 
 interface Input {
   UserPoolId: string;
@@ -14,7 +14,7 @@ export interface DynamoDBUserRecord {
   UserCreateDate: number;
   UserLastModifiedDate: number;
   Enabled: boolean;
-  UserStatus: 'CONFIRMED' | 'UNCONFIRMED' | 'RESET_REQUIRED';
+  UserStatus: 'CONFIRMED' | 'UNCONFIRMED' | 'RESET_REQUIRED' | 'FORCE_CHANGE_PASSWORD';
   Attributes: readonly UserAttribute[];
 }
 
@@ -54,9 +54,9 @@ export const ListUsers = ({ cognitoClient }: Services): ListUsersTarget => async
       }
       // using '=' is equals, ^= is starts with, e.g. 'given_name ^= "Ma"' is first name starting with Ma
       const matchEq = (attr: string) => attr == value;
-      const matchStartsWith = (attr: string) => attr.startsWith(value);
+      const matchStartsWith = (attr: string) => attr && attr.startsWith(value);
       const match = eqType === '^=' ? matchStartsWith : matchEq;
-      users = users.filter((e) => e.Attributes.find((e2) => e2.Name == field && match(e2.Value)));
+      users = users.filter((e) => match(attributeValue(field, e.Attributes)));
     } else {
       throw new Error(`could not parse filter ${body.Filter}`);
     }
