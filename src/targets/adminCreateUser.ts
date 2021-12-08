@@ -23,7 +23,6 @@ export const AdminCreateUser = ({ cognitoClient }: Services): AdminCreateUserTar
   const userPool = await cognitoClient.getUserPool(body.UserPoolId);
   const existingUser = await userPool.getUserByUsername(body.Username);
   if (existingUser) {
-    console.dir('An account with the given email already exists');
     throw new UsernameExistsError();
   }
 

@@ -117,9 +117,7 @@ export const createUserPoolClient = async (
     },
 
     async listUsers(): Promise<readonly User[]> {
-      log.debug('listUsers');
       const users = await dataStore.get<Record<string, User>>('Users', {});
-
       return Object.values(users);
     },
 
@@ -135,8 +133,14 @@ export const createUserPoolClient = async (
         Attributes: attributes,
       });
     },
-    async deleteUser(user) {
-      await dataStore.delete(['Users', user.Username]);
+    async deleteUser(user: User) {
+      const users = await dataStore.get<Record<string, User>>('Users', {});
+
+      for (const k of Object.keys(users)) {
+        if (users[k].Username === user.Username) {
+          await dataStore.delete(['Users', k]);
+        }
+      }
     },
   };
 };

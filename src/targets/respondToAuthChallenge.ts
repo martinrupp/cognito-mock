@@ -1,10 +1,14 @@
+import { attributeValue } from '../services/userPoolClient';
 import { CodeMismatchError, NotAuthorizedError } from '../errors';
 import { Services } from '../services';
 import { generateTokens } from '../services/tokens';
 
 interface Input {
-  ChallengeName: 'SMS_MFA';
+  ChallengeName: 'SMS_MFA' | 'NEW_PASSWORD_REQUIRED';
   ChallengeResponses: {
+    NEW_PASSWORD: string;
+    'userAttributes.family_name': string;
+    'userAttributes.given_name': string;
     USERNAME: string;
     SMS_MFA_CODE: string;
   };
@@ -32,14 +36,28 @@ export const RespondToAuthChallenge = ({ cognitoClient }: Services): RespondToAu
     throw new NotAuthorizedError();
   }
 
-  if (user.MFACode !== body.ChallengeResponses.SMS_MFA_CODE) {
-    throw new CodeMismatchError();
-  }
+  if (body.ChallengeName === 'NEW_PASSWORD_REQUIRED' && user.UserStatus === 'FORCE_CHANGE_PASSWORD') {
+    await userPool.deleteUser(user);
+    await userPool.saveUser({
+      ...user,
+      Attributes: [
+        { Name: 'sub', Value: attributeValue('sub', user.Attributes) },
+        { Name: 'email', Value: attributeValue('email', user.Attributes) },
+        { Name: 'given_name', Value: body.ChallengeResponses['userAttributes.given_name'] },
+        { Name: 'family_name', Value: body.ChallengeResponses['userAttributes.family_name'] },
+      ],
+      UserStatus: 'CONFIRMED',
+    });
+  } else {
+    if (user.MFACode !== body.ChallengeResponses.SMS_MFA_CODE) {
+      throw new CodeMismatchError();
+    }
 
-  await userPool.saveUser({
-    ...user,
-    MFACode: undefined,
-  });
+    await userPool.saveUser({
+      ...user,
+      MFACode: undefined,
+    });
+  }
 
   return {
     ChallengeName: body.ChallengeName,

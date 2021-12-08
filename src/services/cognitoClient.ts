@@ -45,7 +45,7 @@ export const createCognitoClient = async (
       if (!appClient) {
         throw new ResourceNotFoundError();
       }
-      return createUserPoolClient({ ...userPoolDefaultOptions, Id: appClient.UserPoolId }, clients, createDataStore);
+      return this.getUserPool(appClient.UserPoolId);
     },
   };
 };

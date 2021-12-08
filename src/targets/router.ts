@@ -35,6 +35,7 @@ export type Route = (body: any) => Promise<any>;
 export type Router = (target: string) => Route;
 
 export const Router = (services: Services): Router => (target: string) => {
+  console.log(target);
   if (!isSupportedTarget(target)) {
     return () => Promise.reject(new UnsupportedError(`Unsupported x-amz-target header "${target}"`));
   }

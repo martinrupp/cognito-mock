@@ -4,7 +4,7 @@ import { generateTokens } from '../services/tokens';
 import { attributeValue, User } from '../services/userPoolClient';
 
 interface Input {
-  AuthFlow: 'USER_PASSWORD_AUTH' | 'CUSTOM_AUTH';
+  AuthFlow: 'USER_PASSWORD_AUTH' | 'CUSTOM_AUTH' | 'USER_SRP_AUTH';
   ClientId: string;
   AuthParameters: { USERNAME: string; PASSWORD: string };
   Session: string | null;
@@ -31,7 +31,21 @@ export interface PasswordVerifierOutput {
   };
 }
 
-export type Output = SmsMfaOutput | PasswordVerifierOutput;
+export interface NewPasswordOutput {
+  ChallengeName: 'NEW_PASSWORD_REQUIRED';
+}
+export interface PasswordVerifierOutput2 {
+  ChallengeName: 'PASSWORD_VERIFIER';
+  ChallengeParameters: {
+    USERNAME: string;
+    USER_ID_FOR_SRP: string;
+    SALT: string;
+    SECRET_BLOCK: string;
+    SRP_B: string;
+  };
+}
+
+export type Output = SmsMfaOutput | PasswordVerifierOutput | PasswordVerifierOutput2 | NewPasswordOutput;
 
 export type InitiateAuthTarget = (body: Input) => Promise<Output>;
 
@@ -82,6 +96,10 @@ const verifyPasswordChallenge = (user: User, body: Input, userPool: UserPoolClie
   Session: body.Session,
 });
 
+const changePasswordChallenge = (user: User, body: Input, userPool: UserPoolClient): NewPasswordOutput => ({
+  ChallengeName: 'NEW_PASSWORD_REQUIRED',
+});
+
 export const InitiateAuth = ({ codeDelivery, cognitoClient, triggers }: Services): InitiateAuthTarget => async (
   body,
 ) => {
@@ -110,6 +128,9 @@ export const InitiateAuth = ({ codeDelivery, cognitoClient, triggers }: Services
 
   if (!user) {
     throw new NotAuthorizedError();
+  }
+  if (user.UserStatus === 'FORCE_CHANGE_PASSWORD') {
+    return changePasswordChallenge(user, body, userPool);
   }
   if (user.UserStatus === 'RESET_REQUIRED') {
     throw new PasswordResetRequiredError();

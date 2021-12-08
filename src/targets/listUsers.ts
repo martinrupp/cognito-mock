@@ -1,3 +1,4 @@
+import { UnsupportedError } from '../errors';
 import { Services } from '../services';
 import { attributeValue, UserAttribute } from '../services/userPoolClient';
 
@@ -50,7 +51,7 @@ export const ListUsers = ({ cognitoClient }: Services): ListUsersTarget => async
 
       const [, field, eqType, value] = res;
       if (!supportedFilters.includes(field)) {
-        throw new Error(`unsupported filter ${field}`);
+        throw new UnsupportedError(`unsupported filter ${field}`);
       }
       // using '=' is equals, ^= is starts with, e.g. 'given_name ^= "Ma"' is first name starting with Ma
       const matchEq = (attr: string) => attr == value;
