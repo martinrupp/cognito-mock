@@ -1,4 +1,4 @@
-import { attributeValue } from '../services/userPoolClient';
+import { attributesToRecord, attributeValue } from '../services/userPoolClient';
 import { CodeMismatchError, NotAuthorizedError } from '../errors';
 import { Services } from '../services';
 import { generateTokens } from '../services/tokens';
@@ -17,8 +17,8 @@ interface Input {
 }
 
 interface Output {
-  ChallengeName: string;
-  ChallengeParameters: {};
+  ChallengeName?: string;
+  ChallengeParameters?: {};
   AuthenticationResult: {
     IdToken: string;
     AccessToken: string;
@@ -36,8 +36,8 @@ export const RespondToAuthChallenge = ({ cognitoClient }: Services): RespondToAu
     throw new NotAuthorizedError();
   }
 
-  if (body.ChallengeName === 'NEW_PASSWORD_REQUIRED' && user.UserStatus === 'FORCE_CHANGE_PASSWORD') {
-    await userPool.deleteUser(user);
+  if (body.ChallengeName === 'NEW_PASSWORD_REQUIRED') {
+    // && user.UserStatus === 'FORCE_CHANGE_PASSWORD') {
     await userPool.saveUser({
       ...user,
       Attributes: [
@@ -48,6 +48,11 @@ export const RespondToAuthChallenge = ({ cognitoClient }: Services): RespondToAu
       ],
       UserStatus: 'CONFIRMED',
     });
+
+    return {
+      AuthenticationResult: generateTokens(user, body.ClientId, userPool.config.Id),
+      Session: body.Session,
+    };
   } else {
     if (user.MFACode !== body.ChallengeResponses.SMS_MFA_CODE) {
       throw new CodeMismatchError();
@@ -61,7 +66,11 @@ export const RespondToAuthChallenge = ({ cognitoClient }: Services): RespondToAu
 
   return {
     ChallengeName: body.ChallengeName,
-    ChallengeParameters: {},
+    ChallengeParameters: {
+      USER_ID_FOR_SRP: user.Username,
+      requiredAttributes: JSON.stringify([]),
+      userAttributes: JSON.stringify(attributesToRecord(user.Attributes)),
+    },
     AuthenticationResult: generateTokens(user, body.ClientId, userPool.config.Id),
     Session: body.Session,
   };

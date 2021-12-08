@@ -100,7 +100,8 @@ export const createUserPoolClient = async (
       const aliasPhoneNumberEnabled = config.UsernameAttributes?.includes('phone_number');
 
       const users = await dataStore.get<Record<string, User>>('Users', {});
-      for (const user of Object.values(users)) {
+      const values = Object.values(users).filter((e) => e);
+      for (const user of values) {
         if (attributesIncludeMatch('sub', username, user.Attributes)) {
           return user;
         }
@@ -118,7 +119,7 @@ export const createUserPoolClient = async (
 
     async listUsers(): Promise<readonly User[]> {
       const users = await dataStore.get<Record<string, User>>('Users', {});
-      return Object.values(users);
+      return Object.values(users).filter((e) => e);
     },
 
     async saveUser(user) {
@@ -128,7 +129,15 @@ export const createUserPoolClient = async (
         ? user.Attributes
         : [{ Name: 'sub', Value: user.Username }, ...user.Attributes];
 
-      await dataStore.set<User>(`Users.${user.Username}`, {
+      let index = user.Username;
+      const users = await dataStore.get<Record<string, User>>('Users', {});
+      for (const k of Object.keys(users)) {
+        if (users[k].Username === user.Username) {
+          index = k;
+        }
+      }
+
+      await dataStore.set<User>(`Users.${index}`, {
         ...user,
         Attributes: attributes,
       });

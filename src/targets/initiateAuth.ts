@@ -1,7 +1,9 @@
+import { AttributeListType, InitiateAuthResponse } from 'aws-sdk/clients/cognitoidentityserviceprovider';
+import * as uuid from 'uuid';
 import { InvalidPasswordError, NotAuthorizedError, PasswordResetRequiredError, UnsupportedError } from '../errors';
 import { CodeDelivery, Services, UserPoolClient } from '../services';
 import { generateTokens } from '../services/tokens';
-import { attributeValue, User } from '../services/userPoolClient';
+import { attributeValue, User, UserAttribute } from '../services/userPoolClient';
 
 interface Input {
   AuthFlow: 'USER_PASSWORD_AUTH' | 'CUSTOM_AUTH' | 'USER_SRP_AUTH';
@@ -45,7 +47,7 @@ export interface PasswordVerifierOutput2 {
   };
 }
 
-export type Output = SmsMfaOutput | PasswordVerifierOutput | PasswordVerifierOutput2 | NewPasswordOutput;
+export type Output = SmsMfaOutput | PasswordVerifierOutput | PasswordVerifierOutput2 | InitiateAuthResponse;
 
 export type InitiateAuthTarget = (body: Input) => Promise<Output>;
 
@@ -96,8 +98,18 @@ const verifyPasswordChallenge = (user: User, body: Input, userPool: UserPoolClie
   Session: body.Session,
 });
 
-const changePasswordChallenge = (user: User, body: Input, userPool: UserPoolClient): NewPasswordOutput => ({
+// from cognito-local
+export const attributesToRecord = (attributes: readonly UserAttribute[] | undefined): Record<string, string> =>
+  (attributes ?? []).reduce((acc, attr) => ({ ...acc, [attr.Name]: attr.Value }), {});
+
+const changePasswordChallenge = (user: User, body: Input, userPool: UserPoolClient): InitiateAuthResponse => ({
   ChallengeName: 'NEW_PASSWORD_REQUIRED',
+  ChallengeParameters: {
+    USER_ID_FOR_SRP: user.Username,
+    requiredAttributes: JSON.stringify([]),
+    userAttributes: JSON.stringify(attributesToRecord(user.Attributes)),
+  },
+  Session: uuid.v4(),
 });
 
 export const InitiateAuth = ({ codeDelivery, cognitoClient, triggers }: Services): InitiateAuthTarget => async (
